@@ -1,0 +1,13 @@
+{
+  "app_name": "Gauteng Shopping Hub",
+  "display_name": "Gauteng Shopping Hub",
+  "description": "Local marketplace for Gauteng - Shop clothing, electronics, crafts from local sellers and pay with Pi. Integrated with Revealed Logistics for delivery and Revelation Bus Company for inter-city orders.",
+  "category": "E-commerce & Shopping",
+  "tags": ["shopping", "marketplace", "gauteng", "pi-commerce", "south-africa"],
+  "developer": "Ndhlovu36",
+  "version": "1.0.0",
+  "ecosystem_apps": ["Revealed Logistics", "Revelation Bus Company"],
+  "features": ["Pi Payments", "Local Sellers", "Gauteng Delivery", "Cart & Checkout"],
+  "region": "Gauteng, South Africa",
+  "hackathon_track": "E-commerce"
+}
