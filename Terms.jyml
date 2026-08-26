@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Terms of Service - Gauteng Shopping Hub</title>
+<style>
+body{font-family:Arial,sans-serif;max-width:800px;margin:0 auto;padding:20px;line-height:1.6;color:#333}
+h1{color:#2e7d32}h2{color:#444;margin-top:30px}
+</style>
+</head>
+<body>
+<h1>Terms of Service - Gauteng Shopping Hub</h1>
+<p><strong>Last Updated:</strong> August 26, 2026</p>
+<p><strong>Developer:</strong> Ndhlovu36 - Johannesburg, Gauteng, South Africa</p>
+
+<h2>1. Acceptance of Terms</h2>
+<p>By accessing https://ndhlovu36.github.io/gauteng-shopping-hub/ and using our Pi-powered marketplace, you agree to these Terms. If you disagree, do not use the App.</p>
+
+<h2>2. Description of Service</h2>
+<p>Gauteng Shopping Hub is a local e-commerce platform where users browse products (T-shirts, sneakers, bags, phone accessories, local goods) and pay using Pi Network cryptocurrency via Pi SDK 2.0.</p>
+
+<h2>3. Pi Payments & Transactions</h2>
+<p>3.1 All prices displayed in Pi (π). Pi transactions are final and recorded on Pi blockchain.<br>
+3.2 Payments processed via Pi.createPayment() and Pi.completePayment(). We do not hold your Pi private keys.<br>
+3.3 Refunds: 7-day refund policy for defective goods. Refund in Pi equivalent at transaction rate. Contact seller within 48 hours.<br>
+3.4 Pi is volatile. You accept value fluctuation.</p>
+
+<h2>4. User Accounts</h2>
+<p>4.1 Authentication via Pi Network - your Pi username (@Ndhlovu36 etc).<br>
+4.2 You are responsible for your Pi Wallet passphrase. We cannot recover it.<br>
+4.3 One account per Pi user. No fraudulent activity.</p>
+
+<h2>5. Seller & Buyer Responsibilities</h2>
+<p>5.1 Sellers: Must accurately describe products, provide real stock, ship within 3 business days in Gauteng.<br>
+5.2 Buyers: Inspect goods on delivery. Confirm receipt.<br>
+5.3 Delivery is via Revealed Logistics (our partner app). Delivery fees apply.</p>
+
+<h2>6. Prohibited Items</h2>
+<p>No illegal goods, counterfeit products, drugs, weapons, adult content. We reserve right to remove listings.</p>
+
+<h2>7. Delivery & Risk</h2>
+<p>Delivery within Gauteng 24-48hrs, outside Gauteng 3-5 days. Risk transfers on delivery confirmation.</p>
+
+<h2>8. Intellectual Property</h2>
+<p>All app content, logo, design owned by Ndhlovu36 / Gauteng Shopping Hub. Do not copy.</p>
+
+<h2>9. Limitation of Liability</h2>
+<p>Service provided "as is". We are not liable for Pi network downtime, wallet issues, or third-party delivery delays. Maximum liability limited to Pi amount paid for order.</p>
+
+<h2>10. Governing Law</h2>
+<p>These Terms governed by laws of South Africa, Gauteng jurisdiction.</p>
+
+<h2>11. Changes to Terms</h2>
+<p>We may update Terms. Continued use after update = acceptance.</p>
+
+<h2>12. Contact</h2>
+<p>Email: ndhlovu36@gmail.com<br>
+Pi App: Gauteng Shopping Hub - Developer Portal<br>
+Location: Johannesburg, South Africa</p>
+
+<p><em>Part of Ndhlovu36 6-App Ecosystem: Revelation Bus, Revealed Logistics, Marble Floors SA, Resurrected Building Projects, Agri Equipment Market.</em></p>
+</body>
+</html>
