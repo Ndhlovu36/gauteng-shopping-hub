@@ -1,0 +1,4 @@
+{
+  "name": "gauteng-shopping-hub",
+  "rewrites": [{ "source": "/(.*)", "destination": "/index.html" }]
+}
