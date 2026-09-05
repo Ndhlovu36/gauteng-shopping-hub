@@ -1,0 +1,12 @@
+<!DOCTYPE html><html><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Escrow Admin @Ndhlovu36</title>
+<style>body{font-family:Arial;max-width:1000px;margin:20px auto;padding:15px}.row{border:1px solid #ddd;padding:12px;margin:8px 0;border-radius:8px}button{padding:8px 12px;border:0;border-radius:6px;cursor:pointer}.release{background:#22c55e;color:white}.refund{background:#ef4444;color:white}</style>
+</head><body>
+<h2>🔒 Escrow Admin - @Ndhlovu36 (5%)</h2><div><button onclick="load('escrow_held')">Held</button><button onclick="load('released')">Released</button><button onclick="load('refunded')">Refunded</button></div><div id="list"></div>
+<script type="module">
+import {createClient} from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm';
+const supabase=createClient('YOUR_SUPABASE_URL','YOUR_SUPABASE_KEY');
+window.load=async function(status='escrow_held'){let {data}=await supabase.from('escrow_transactions').select('*, products(title)').eq('status',status).order('created_at',{ascending:false});document.getElementById('list').innerHTML=data.map(e=>`<div class="row"><b>#${e.id}</b> ${e.products?.title||''}<br>Buyer: ${e.buyer_username} | Amount: ${e.amount_pi} Pi | You Keep: ${e.commission_pi} Pi (5%) | Seller Gets: ${e.seller_gets_pi} Pi<br>Status: ${e.status} | ${e.listing_type||''}<br>${e.status==='escrow_held'?`<button class="release" onclick="releaseEscrow(${e.id},${e.seller_gets_pi})">Release</button><button class="refund" onclick="refundEscrow(${e.id})">Refund</button>`:''}</div>`).join('')||'No transactions';}
+window.releaseEscrow=async function(id,amt){if(!confirm('Release? Send '+amt+' Pi to seller via Pi Wallet App after!'))return;await supabase.from('escrow_transactions').update({status:'released'}).eq('id',id);alert('Released! Now send '+amt+' Pi to seller in Pi Wallet');load('escrow_held');}
+window.refundEscrow=async function(id){await supabase.from('escrow_transactions').update({status:'refunded'}).eq('id',id);alert('Refunded! Send Pi back to buyer');load('escrow_held');}
+load('escrow_held');
+</script></body></html>
