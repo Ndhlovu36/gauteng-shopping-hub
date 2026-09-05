@@ -1,0 +1,15 @@
+<!DOCTYPE html><html><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Register Business</title>
+<script src="https://sdk.minepi.com/pi-sdk.js"></script><script>Pi.init({version:"2.0",sandbox:false});</script>
+<style>body{font-family:Arial;max-width:500px;margin:20px auto;padding:20px}input,select,textarea{width:100%;padding:12px;margin:8px 0;border:1px solid #ccc;border-radius:8px}button{background:#7b2ff7;color:white;padding:14px;border:0;border-radius:8px;width:100%;font-weight:bold}#info{background:#eef;padding:10px;border-radius:8px;display:none}</style>
+</head><body>
+<h2>Register Business</h2><p>Escrow 5% to @Ndhlovu36</p>
+<input id="bizName" placeholder="Business Name"><select id="category" onchange="showInfo()"><option value="">Type...</option><option value="cars">🚗 Car Dealership</option><option value="grocery">🛒 Grocery</option><option value="realestate">🏠 Real Estate</option><option value="building">🔨 Building</option><option value="agri">🚜 Agri</option><option value="logistics">📦 Logistics</option></select><div id="info"></div>
+<input id="phone" placeholder="WhatsApp"><input id="location" placeholder="Location e.g. Soweto"><textarea id="desc" placeholder="What do you sell?"></textarea>
+<button onclick="registerBiz()">Register with Pi</button>
+<script type="module">
+import {createClient} from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm';
+const supabase=createClient('YOUR_SUPABASE_URL','YOUR_SUPABASE_KEY');
+window.showInfo=function(){const m={cars:"Cars fields: Make Model Year Mileage",grocery:"Grocery fields: Stock Expiry",realestate:"Real Estate: Beds Baths Sale/Rental/Management"};let c=document.getElementById('category').value;let el=document.getElementById('info');el.style.display='block';el.innerText=m[c]||'';}
+window.registerBiz=async function(){try{const auth=await Pi.authenticate(['username'],()=>{});let biz={pi_username:auth.user.username,name:document.getElementById('bizName').value,category:document.getElementById('category').value,phone:document.getElementById('phone').value,location:document.getElementById('location').value,description:document.getElementById('desc').value};if('YOUR_SUPABASE_URL'.includes('YOUR_')){let list=JSON.parse(localStorage.getItem('gauteng_businesses')||'[]');let nb={...biz,id:Date.now(),products:[]};list.push(nb);localStorage.setItem('gauteng_businesses',JSON.stringify(list));localStorage.setItem('currentBiz',JSON.stringify(nb));}else{let {data}=await supabase.from('businesses').insert(biz).select().single();localStorage.setItem('currentBiz',JSON.stringify(data));}alert('Registered!');location.href='/business/dashboard.html';}catch(e){alert(e.message);}}
+</script></body></html>
