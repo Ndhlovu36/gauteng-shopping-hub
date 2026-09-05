@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Register Business - Gauteng Hub</title>
+<script src="https://sdk.minepi.com/pi-sdk.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<style>
+body{font-family:Arial;padding:20px;background:#f8f8ff}
+input,select,textarea{width:100%;padding:14px;margin:8px 0;border:1px solid #ddd;border-radius:8px;font-size:16px}
+button{width:100%;padding:16px;background:#6c3ce0;color:white;border:none;border-radius:10px;font-size:18px;font-weight:bold;margin-top:10px}
+</style>
+</head>
+<body>
+<h1>Register Business</h1>
+<p>Escrow 5% to @Ndhlovu36</p>
+
+<input id="bname" placeholder="Business Name" value="Gauteng Shopping Hub">
+<select id="btype">
+<option value="">Type...</option>
+<option value="Car Dealership">🚗 Car Dealership</option>
+<option value="Grocery">🛒 Grocery</option>
+<option value="Real Estate" selected>🏠 Real Estate</option>
+<option value="Building">🔨 Building</option>
+<option value="Agri">🚜 Agri</option>
+<option value="Logistics">📦 Logistics</option>
+<option value="Travel">✈️ Travel</option>
+</select>
+<input id="phone" placeholder="WhatsApp +27..." value="+27607263726">
+<input id="address" placeholder="Address" value="1691 Gordon Road, Henley on Klip, Meyerton, Gauteng">
+<textarea id="desc" placeholder="What do you sell?">Houses,Cars,Groceries,Building,Agri,Logistics,Travel</textarea>
+
+<button id="regBtn" onclick="register()">Register with Pi</button>
+<p id="status"></p>
+
+<script>
+// ⚠️ PASTE YOUR REAL KEYS HERE FROM YOUR SUPABASE SCREENSHOT
+const SUPABASE_URL = 'https://ydsyroenqjgqXXXXXXXX.supabase.co';
+const SUPABASE_KEY = 'sb_publishable_XXXXXXXXXXXXX_XXXXXXXXXXXX';
+
+const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+Pi.init({ version: "2.0", sandbox: false });
+
+async function register(){
+ const btn = document.getElementById('regBtn');
+ const status = document.getElementById('status');
+ try{
+   btn.innerText = "Connecting Pi...";
+   btn.disabled = true;
+
+   // 1. Pi Auth
+   const auth = await Pi.authenticate(['username'], (payment)=>{});
+   const piUsername = auth.user.username;
+
+   btn.innerText = "Saving business...";
+
+   // 2. Save to Supabase
+   const { data, error } = await supabaseClient.from('businesses').insert([{
+     name: document.getElementById('bname').value,
+     type: document.getElementById('btype').value,
+     phone: document.getElementById('phone').value,
+     address: document.getElementById('address').value,
+     description: document.getElementById('desc').value,
+     owner_pi_username: piUsername,
+     owner_wallet: piUsername
+   }]).select();
+
+   if(error) throw error;
+
+   status.innerText = "✅ Registered as @" + piUsername + "! Redirecting...";
+   localStorage.setItem('business_id', data[0].id);
+   setTimeout(()=>{ window.location.href = 'dashboard.html'; }, 1500);
+
+ } catch(e){
+   console.error(e);
+   status.innerText = "❌ Error: " + e.message;
+   btn.innerText = "Register with Pi";
+   btn.disabled = false;
+   alert("Error: " + e.message + "\n\n1. Check Supabase RLS is OFF\n2. Check keys are correct\n3. Must be in Pi Browser");
+ }
+}
+</script>
+</body>
+</html>
