@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Gauteng Shopping Hub - Buy with Pi</title>
+<script src="https://sdk.minepi.com/pi-sdk.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:Arial;background:#f8f5ff;color:#333}
+header{background:#6c3ce0;color:white;padding:15px;text-align:center;position:sticky;top:0;z-index:100}
+header h1{font-size:22px}
+header p{font-size:13px;opacity:0.9}
+.search{padding:12px;background:white;display:flex;gap:8px}
+.search input{flex:1;padding:12px;border:1px solid #ddd;border-radius:8px}
+.cat{display:flex;gap:8px;padding:10px;overflow-x:auto;background:white}
+.cat button{padding:8px 14px;border:1px solid #6c3ce0;border-radius:20px;background:white;color:#6c3ce0;white-space:nowrap}
+.cat button.active{background:#6c3ce0;color:white}
+.grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;padding:12px}
+.card{background:white;border-radius:12px;overflow:hidden;box-shadow:0 2px 8px rgba(0,0,0,0.1)}
+.card img{width:100%;height:130px;object-fit:cover;background:#eee}
+.card-body{padding:10px}
+.price{color:#6c3ce0;font-weight:bold;font-size:16px}
+.buy{width:100%;padding:10px;background:#6c3ce0;color:white;border:none;border-radius:8px;margin-top:8px;font-weight:bold}
+.topbar{display:flex;justify-content:space-between;padding:10px;background:#efe8ff;font-size:12px}
+</style>
+</head>
+<body>
+<header>
+<h1>Gauteng Shopping Hub</h1>
+<p>Escrow Protected - 5% Fee to @Ndhlovu36</p>
+</header>
+<div class="topbar">
+<span id="piUser">Not logged in Pi Browser</span>
+<span>🇿🇦 SA's Pi Marketplace</span>
+</div>
+<div class="search">
+<input id="searchInput" placeholder="Search cars, houses, groceries..." oninput="loadProducts()">
+</div>
+<div class="cat">
+<button class="active" onclick="filterCat('All',this)">All</button>
+<button onclick="filterCat('Car Dealership',this)">🚗 Cars</button>
+<button onclick="filterCat('Real Estate',this)">🏠 Rent</button>
+<button onclick="filterCat('Grocery',this)">🛒 Grocery</button>
+<button onclick="filterCat('Building',this)">🔨 Building</button>
+<button onclick="filterCat('Agri',this)">🚜 Agri</button>
+<button onclick="filterCat('Logistics',this)">📦 Logistics</button>
+</div>
+<div id="grid" class="grid">
+<p style="padding:20px">Loading products from Supabase...</p>
+</div>
+<script>
+const SUPABASE_URL = 'https://ydsyroengjqgqpcmiwwviv.supabase.co';
+const SUPABASE_KEY = 'sb_publishable_F3wwOXBhRqmK3h1z8gRXPw_R90wFf4T';
+const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+Pi.init({ version: "2.0", sandbox: false });
+let currentCat = 'All';
+let allProducts = [];
+async function initPi(){
+ try{
+  const auth = await Pi.authenticate(['username'], ()=>{});
+  document.getElementById('piUser').innerText = '@' + auth.user.username;
+ }catch(e){ console.log('Pi not logged'); }
+}
+async function loadProducts(){
+ const search = document.getElementById('searchInput').value.toLowerCase();
+ try{
+  let { data, error } = await supabaseClient.from('products').select('*').order('created_at',{ascending:false});
+  if(error) throw error;
+  allProducts = data || [];
+  let filtered = allProducts;
+  if(currentCat !== 'All') filtered = filtered.filter(p => p.category === currentCat);
+  if(search) filtered = filtered.filter(p => p.name.toLowerCase().includes(search) || (p.description||'').toLowerCase().includes(search));
+  if(filtered.length === 0){
+   document.getElementById('grid').innerHTML = '<p style="padding:20px">No listings yet.<br><br>Go to Supabase > Table Editor > products > Insert row to add your first product!</p>';
+   return;
+  }
+  document.getElementById('grid').innerHTML = filtered.map(p => `
+   <div class="card">
+    <img src="${p.image_url || 'https://via.placeholder.com/300?text='+encodeURIComponent(p.name)}">
+    <div class="card-body">
+     <div style="font-size:11px;color:#888">${p.category||'General'}</div>
+     <div style="font-weight:bold;margin:4px 0">${p.name}</div>
+     <div class="price">${p.price} Pi</div>
+     <div style="font-size:11px;color:#666">${(p.description||'').substring(0,60)}</div>
+     <button class="buy" onclick="buyWithPi('${p.id}','${p.name.replace(/'/g,'')}','${p.price}')">Buy with Pi</button>
+    </div>
+   </div>
+  `).join('');
+ }catch(err){
+  document.getElementById('grid').innerHTML = 'Error: ' + err.message + '<br>Check Supabase tables exist';
+ }
+}
+function filterCat(cat, btn){
+ currentCat = cat;
+ document.querySelectorAll('.cat button').forEach(b=>b.classList.remove('active'));
+ btn.classList.add('active');
+ loadProducts();
+}
+async function buyWithPi(productId, title, price){
+ try{
+  const paymentData = {
+   amount: parseFloat(price),
+   memo: title,
+   metadata: { productId, escrow_fee: 0.05, admin: 'Ndhlovu36' }
+  };
+  await Pi.createPayment(paymentData, {
+   onReadyForServerApproval: async (paymentId) => {
+    console.log('Approval needed', paymentId);
+   },
+   onReadyForServerCompletion: async (paymentId, txid) => {
+    alert('✅ Payment Success! 5% to @Ndhlovu36. Seller will WhatsApp you.');
+   },
+   onCancel: () => alert('Payment cancelled'),
+   onError: (e) => alert('Payment error: '+e)
+  });
+ } catch(e){ alert('Open in Pi Browser: '+e.message); }
+}
+initPi();
+loadProducts();
+</script>
+</body>
+</html>
