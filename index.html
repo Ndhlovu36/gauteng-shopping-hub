@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>GAUTENG SHOPPING HUB - Pi Only</title>
+<script src="https://sdk.minepi.com/pi-sdk.js"></script>
+<script>Pi.init({version:"2.0", sandbox:false});</script>
+<style>
+body{margin:0;font-family:Arial;background:#fff}
+.head{background:#4a148c;height:10px}
+.wrap{padding:12px}
+.login{width:100%;padding:14px;background:#4a148c;color:white;border:none;border-radius:10px;font-size:16px;margin-bottom:10px}
+input{width:100%;padding:12px;margin:8px 0;border:1px solid #777;border-radius:6px;box-sizing:border-box}
+.grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:10px}
+.card{border:2px solid #4a148c;border-radius:10px;padding:14px;text-align:center;background:white}
+.card b{display:block;margin:10px 0;font-size:18px}
+.btn{width:100%;background:#d8a8e0;border:none;padding:10px;border-radius:10px;font-weight:bold}
+</style>
+</head>
+<body>
+<div class="head"></div>
+<div class="wrap">
+<button class="login" onclick="login()">Login with Pi</button>
+<p id="user" style="font-size:13px">Not logged in</p>
+<input id="to" placeholder="Delivery Address">
+<div class="grid">
+<div class="card"><h3>Grocery Pack</h3><b>2 Pi</b><button class="btn" onclick="pay(2,'Grocery Pack')">Pay 2 Pi</button></div>
+<div class="card"><h3>Electronics</h3><b>5 Pi</b><button class="btn" onclick="pay(5,'Electronics')">Pay 5 Pi</button></div>
+<div class="card"><h3>Fashion Bundle</h3><b>4 Pi</b><button class="btn" onclick="pay(4,'Fashion Bundle')">Pay 4 Pi</button></div>
+<div class="card"><h3>Home Appliances</h3><b>12 Pi</b><button class="btn" onclick="pay(12,'Home Appliances')">Pay 12 Pi</button></div>
+</div>
+<h3 style="margin-top:20px">My Orders (Locally Saved)</h3>
+<div id="myBookings">No orders yet</div>
+</div>
+<script>
+let currentUser=null;
+const S={save:(k,d)=>{try{localStorage.setItem(k,JSON.stringify(d))}catch(e){}},get:(k)=>{try{let v=localStorage.getItem(k);return v?JSON.parse(v):null}catch(e){return null}}};
+function login(){Pi.authenticate(['username','payments'],p=>{if(p)fetch('/api/complete',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({paymentId:p.identifier,txid:p.transaction.txid})})}).then(a=>{currentUser=a.user;document.getElementById('user').innerText='Hello '+a.user.username;S.save('u_hub',a.user)}).catch(e=>alert(e))}
+function render(){let all=S.get('b_hub')||[];document.getElementById('myBookings').innerHTML=all.length?all.slice().reverse().map(b=>`<div style="border:1px solid purple;padding:6px;margin:4px;border-radius:6px">${b.item} - ${b.amount} Pi - ${b.status}</div>`).join(''):'No orders yet'}
+function pay(a,n){let to=document.getElementById('to').value;if(!to)return alert('Enter delivery address');if(!currentUser)return alert('Login first');let all=S.get('b_hub')||[];all.push({item:n,amount:a,to,status:'pending'});S.save('b_hub',all);render();Pi.createPayment({amount:a,memo:n,metadata:{item:n,to}},{onReadyForServerApproval:id=>{fetch('/api/approve',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({paymentId:id})})},onReadyForServerCompletion:(id,txid)=>{fetch('/api/complete',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({paymentId:id,txid})}).then(()=>{let all=S.get('b_hub')||[];all[all.length-1].status='PAID '+txid.slice(0,8);S.save('b_hub',all);alert('SUCCESS Paid '+txid);render()})},onCancel:()=>alert('Cancelled'),onError:e=>alert(e.message)})}
+window.addEventListener('load',()=>{let u=S.get('u_hub');if(u){currentUser=u;document.getElementById('user').innerText='Hello '+u.username}render()})
+</script>
+</body>
+</html>
