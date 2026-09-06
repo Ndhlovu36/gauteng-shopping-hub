@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>GAUTENG SHOPPING HUB - Pay with Pi</title>
+<script src="https://sdk.minepi.com/pi-sdk.js"></script>
+<script>Pi.init({version:"2.0", sandbox:false});</script>
+<style>
+body{margin:0;font-family:Arial;background:#f5f5f5}
+.head{background:#4a148c;color:#fff;padding:15px;text-align:center}
+.wrap{padding:15px}
+.grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.truck{background:white;border:2px solid #4a148c;border-radius:10px;padding:10px;text-align:center}
+.btn{width:100%;background:#ce93d8;color:#000;border:none;padding:10px;border-radius:8px;font-weight:bold;margin-top:8px}
+input{width:100%;padding:12px;margin:5px 0;box-sizing:border-box}
+.login{width:100%;padding:12px;background:#4a148c;color:white;border:none;border-radius:8px;margin-bottom:10px}
+.book{border:1px solid purple;padding:6px;margin:4px;background:white;border-radius:6px;font-size:13px}
+</style>
+</head>
+<body>
+<div class="head"><h2>🛒 GAUTENG SHOPPING HUB</h2><p id="user">Not logged in</p></div>
+<div class="wrap">
+<button class="login" onclick="login()">Login with Pi</button>
+<input id="to" placeholder="Delivery Address">
+<div class="grid">
+<div class="truck"><h4>Grocery Pack</h4><p>R500 value</p><b>2 Pi</b><button class="btn" onclick="pay(2,'Grocery Pack')">Pay 2 Pi</button></div>
+<div class="truck"><h4>Electronics</h4><p>R1500 value</p><b>5 Pi</b><button class="btn" onclick="pay(5,'Electronics')">Pay 5 Pi</button></div>
+<div class="truck"><h4>Fashion Bundle</h4><p>R3000 value</p><b>4 Pi</b><button class="btn" onclick="pay(4,'Fashion Bundle')">Pay 4 Pi</button></div>
+<div class="truck"><h4>Home Appliances</h4><p>Premium</p><b>12 Pi</b><button class="btn" onclick="pay(12,'Home Appliances')">Pay 12 Pi</button></div>
+</div>
+<h3>My Orders (Locally Saved)</h3>
+<div id="myBookings">No orders yet</div>
+</div>
+<script>
+let currentUser=null;
+const Storage={save:(k,d)=>{try{localStorage.setItem(k,JSON.stringify(d))}catch(e){}},get:(k)=>{try{let v=localStorage.getItem(k);return v?JSON.parse(v):null}catch(e){return null}}};
+function login(){Pi.authenticate(['username','payments'],onIncomplete).then(a=>{currentUser=a.user;document.getElementById('user').innerText='Hello '+a.user.username;Storage.save('pi_user_hub',a.user)}).catch(e=>alert(e))}
+function onIncomplete(p){if(p){fetch('/api/complete',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({paymentId:p.identifier,txid:p.transaction.txid})})}}
+function renderBookings(){let all=Storage.get('pi_bookings_hub')||[];document.getElementById('myBookings').innerHTML=all.length?all.slice().reverse().map(b=>`<div class="book">${b.truck} to ${b.to} - ${b.amount} Pi - ${b.status}</div>`).join(''):'No orders yet';}
+function pay(amount,name){let to=document.getElementById('to').value;if(!to)return alert('Enter address');if(!currentUser)return alert('Login first');let all=Storage.get('pi_bookings_hub')||[];all.push({truck:name,amount,to,date:new Date().toISOString(),status:'pending'});Storage.save('pi_bookings_hub',all);renderBookings();Pi.createPayment({amount,memo:name+' to '+to,metadata:{item:name,to}},{onReadyForServerApproval:id=>{fetch('/api/approve',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({paymentId:id})})},onReadyForServerCompletion:(id,txid)=>{fetch('/api/complete',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({paymentId:id,txid})}).then(()=>{let all=Storage.get('pi_bookings_hub')||[];all[all.length-1].status='PAID '+txid.slice(0,8);Storage.save('pi_bookings_hub',all);alert('SUCCESS! Order Paid Tx:'+txid);renderBookings()})},onCancel:()=>alert('Cancelled'),onError:e=>alert(e.message)})}
+window.addEventListener('load',()=>{let u=Storage.get('pi_user_hub');if(u){currentUser=u;document.getElementById('user').innerText='Hello '+u.username}renderBookings()});
+</script>
+</body>
+</html>
