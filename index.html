@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>Gauteng Shopping Hub - Pi Mall</title>
+<script src="https://sdk.minepi.com/pi-sdk.js"></script>
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<style>
+*{box-sizing:border-box}body{margin:0;font-family:Arial;background:#f5f5f5}
+.top{display:flex;justify-content:space-between;align-items:center;padding:12px;background:#fff;border-bottom:1px solid #ddd}
+.btn{background:#7c3aed;color:#fff;border:0;padding:10px 16px;border-radius:20px;font-weight:bold}
+.tabs{display:flex;background:#eee;overflow:auto}
+.t{flex:1;padding:12px;text-align:center;cursor:pointer;white-space:nowrap}
+.t.active{background:#7c3aed;color:#fff}
+.card{background:#fff;margin:12px;border-radius:12px;padding:14px;box-shadow:0 1px 3px #0001}
+input,select,textarea{width:100%;padding:10px;margin:6px 0;border:1px solid #ccc;border-radius:8px}
+</style>
+</head>
+<body>
+
+<div class="top">
+<b>Gauteng<br>Shopping Hub</b>
+<div><span id="user">Not logged</span><br>
+<button class="btn" onclick="login()">Login with Pi</button></div>
+</div>
+
+<div class="tabs">
+<div class="t active" onclick="showTab('mainnet',this)">Mainnet</div>
+<div class="t" onclick="showTab('testnet',this)">Testnet</div>
+<div class="t" onclick="showTab('register',this)">Register your Business</div>
+<div class="t" onclick="showTab('mall',this)">Mall Products</div>
+</div>
+
+<!-- MAINNET -->
+<div id="mainnet" class="tabpage">
+<div class="card">
+<h3>Delivery Address</h3>
+<input placeholder="Street, Suburb, Gauteng" id="address">
+<input placeholder="WhatsApp Number" id="wa">
+</div>
+<div id="products_main"></div>
+<div class="card"><button onclick="fixFailed()">🔧 FIX FAILED TRANSACTIONS</button><p id="main_status"></p></div>
+</div>
+
+<!-- TESTNET -->
+<div id="testnet" class="tabpage" style="display:none">
+<div class="card"><h3>Testnet Mode - For Pi Reviewers</h3><p>Uses Test-Pi. No real Pi charged.</p></div>
+<div id="products_test"></div>
+<p id="test_status" style="padding:12px"></p>
+</div>
+
+<!-- REGISTER -->
+<div id="register" class="tabpage" style="display:none">
+<div class="card">
+<h3>Register your Business in this Mall</h3>
+<form onsubmit="return registerBiz(event)">
+<input id="bname" required placeholder="Business Name e.g. Marble Floors SA">
+<select id="bcat" required><option value="">Category</option><option>Groceries</option><option>Marble & Tiles</option><option>Logistics - Revealed</option><option>Bus Charter - Revelation</option><option>Fashion</option><option>Food</option></select>
+<input id="bwa" required placeholder="WhatsApp Number">
+<input id="bwallet" required placeholder="Pi Wallet Address (G...) to receive Pi">
+<input id="bprod" required placeholder="Product Name e.g. Grocery Pack">
+<input id="bprice" type="number" step="0.01" required placeholder="Price in Pi e.g. 2">
+<textarea id="bdesc" placeholder="Product Description"></textarea>
+<button class="btn" style="width:100%">Submit Application - List My Products</button>
+</form><p id="reg_msg"></p>
+</div>
+</div>
+
+<!-- MALL -->
+<div id="mall" class="tabpage" style="display:none">
+<div class="card"><h3>All Businesses in Gauteng Mall</h3><div id="mallList"></div></div>
+</div>
+
+<script>
+const Pi = window.Pi;
+Pi.init({version:"2.0"});
+
+let products = JSON.parse(localStorage.getItem('gauteng_hub')||'null') || [
+{name:"Gauteng Groceries", prod:"Grocery Pack", price:2},
+{name:"Marble Floors South Africa", prod:"Marble Floors Service", price:1}
+];
+
+function render(){
+let mHTML="", tHTML="";
+products.forEach(p=>{
+mHTML+=`<div class="card"><b>${p.name} <span style="background:#7c3aed;color:#fff;padding:2px 8px;border-radius:10px">${p.price} Pi</span></b><p>${p.prod}</p><button class="btn" style="width:100%" onclick="pay(${p.price},true,'${p.prod}')">Pay ${p.price} Pi with Pi</button></div>`;
+tHTML+=`<div class="card"><b>${p.name} <span style="background:#7c3aed;color:#fff;padding:2px 8px;border-radius:10px">${p.price} Test-Pi</span></b><p>${p.prod}</p><button class="btn" style="width:100%" onclick="pay(${p.price},false,'${p.prod}')">Pay ${p.price} Test-Pi</button></div>`;
+});
+document.getElementById('products_main').innerHTML=mHTML;
+document.getElementById('products_test').innerHTML=tHTML;
+document.getElementById('mallList').innerHTML=mHTML;
+}
+render();
+
+function showTab(id,el){
+document.querySelectorAll('.tabpage').forEach(x=>x.style.display='none');
+document.getElementById(id).style.display='block';
+document.querySelectorAll('.t').forEach(x=>x.classList.remove('active'));
+el.classList.add('active');
+}
+
+async function login(){
+try{
+Pi.init({version:"2.0", sandbox:false});
+const auth = await Pi.authenticate(['username','payments'], onIncomplete);
+document.getElementById('user').innerText="Hi, "+auth.user.username;
+}catch(e){alert(e)}
+}
+
+async function pay(amount, isMainnet, memo){
+const status = isMainnet? document.getElementById('main_status'): document.getElementById('test_status');
+try{
+Pi.init({version:"2.0", sandbox: !isMainnet});
+await Pi.authenticate(['username','payments'], onIncomplete);
+await Pi.createPayment({amount:amount,memo:memo,metadata:{hub:"gauteng"}},{
+onReadyForServerApproval: (id)=>{status.innerText="Approving... "+id; fetch('/api/approve',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({paymentId:id})})},
+onReadyForServerCompletion: (id,txid)=>{status.innerText="✅ SUCCESS TxID: "+txid+" Pi went to your App Wallet (liquid, not locked)"; fetch('/api/complete',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({paymentId:id,txid:txid})})},
+onCancel: (id)=>{status.innerText="❌ Cancelled"},
+onError: (e)=>{status.innerText="❌ Error: "+e}
+});
+}catch(e){status.innerText="Error: "+e}
+}
+
+function onIncomplete(payment){
+document.getElementById('main_status').innerText="Fixing incomplete payment "+payment.identifier+"...";
+fetch('/api/complete',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({paymentId:payment.identifier, txid:payment.transaction.txid})});
+}
+
+function fixFailed(){ Pi.authenticate(['payments'], onIncomplete); document.getElementById('main_status').innerText="Scanning failed transactions..."; }
+
+function registerBiz(e){
+e.preventDefault();
+products.push({name:document.getElementById('bname').value, prod:document.getElementById('bprod').value+" - "+document.getElementById('bdesc').value, price:parseFloat(document.getElementById('bprice').value)});
+localStorage.setItem('gauteng_hub', JSON.stringify(products));
+document.getElementById('reg_msg').innerText="✅ Business listed! Go to Mall Products tab.";
+render(); e.target.reset(); return false;
+}
+</script>
+<footer style="text-align:center;padding:12px"><a href="/privacy.html">Privacy</a> | <a href="/terms.html">Terms</a></footer>
+</body>
+</html>
