@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>Gauteng Shopping Hub - Pi Mall</title>
+<script src="https://sdk.minepi.com/pi-sdk.js"></script>
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<style>
+*{box-sizing:border-box}body{margin:0;font-family:Arial;background:#f5f5f5}
+.top{display:flex;justify-content:space-between;padding:12px;background:#fff;border-bottom:1px solid #ddd;position:sticky;top:0;z-index:10}
+.btn{background:#7c3aed;color:#fff;border:0;padding:10px 14px;border-radius:20px;font-weight:bold;cursor:pointer}
+.tabs{display:flex;background:#111;overflow:auto;position:sticky;top:0;z-index:10}
+.t{flex:1;padding:12px 8px;text-align:center;cursor:pointer;color:#ccc;white-space:nowrap;font-size:13px}
+.t.active{background:#7c3aed;color:#fff}
+.card{background:#fff;margin:10px;border-radius:12px;padding:12px;box-shadow:0 1px 3px #0001}
+.badge{background:#7c3aed;color:#fff;padding:2px 8px;border-radius:10px;font-size:12px}
+.cat{background:#111;color:#fff;padding:8px 12px;margin:15px 10px 0 10px;border-radius:8px}
+input,select,textarea{width:100%;padding:10px;margin:5px 0;border:1px solid #ccc;border-radius:8px}
+.hero{width:100%;line-height:0}
+.hero img{width:100%;height:auto;display:block}
+</style>
+</head>
+<body>
+
+<div class="hero"><img src="IMG-20260920-WA3111.jpg" alt="Gauteng Shopping Hub Cover"></div>
+
+<div class="top">
+<div><b>GAUTENG<br>SHOPPING HUB</b><br><small>Pi Mainnet Mall</small></div>
+<div style="text-align:right"><span id="user">Not logged</span><br><button class="btn" onclick="login()">Login with Pi</button></div>
+</div>
+
+<div class="tabs">
+<div class="t active" onclick="showTab('mainnet',this)">Mainnet</div>
+<div class="t" onclick="showTab('testnet',this)">Testnet</div>
+<div class="t" onclick="showTab('register',this)">Register Business</div>
+<div class="t" onclick="showTab('mall',this)">Mall Directory</div>
+</div>
+
+<div id="mainnet" class="tabpage">
+<div class="card"><h3>Delivery Address</h3><input id="address" placeholder="Street, Suburb, Gauteng"><input id="wa" placeholder="WhatsApp Number">
+<button class="btn" style="width:100%;margin-top:8px;background:#000" onclick="fixFailed()">🔧 FIX FAILED TRANSACTIONS</button><p id="main_status"></p></div>
+<div id="main_products"></div>
+</div>
+
+<div id="testnet" class="tabpage" style="display:none">
+<div class="card"><b>Testnet Mode</b> - For Pi Core Team approval.</div>
+<div id="test_products"></div><p id="test_status" style="padding:10px"></p>
+</div>
+
+<div id="register" class="tabpage" style="display:none">
+<div class="card">
+<h3>Register Your Business in this Mall</h3>
+<form onsubmit="return registerBiz(event)">
+<input id="bname" required placeholder="Business Name">
+<select id="bcat" required><option value="">Select Category</option><option>Groceries</option><option>Electronics</option><option>Car Dealerships & Spare Parts</option><option>Real Estates</option><option>Fuel Stations</option><option>Hardwares</option><option>Construction Machinery</option><option>Factories & Warehouses</option></select>
+<input id="bwa" required placeholder="WhatsApp">
+<input id="bwallet" required placeholder="Pi Wallet Address G...">
+<input id="bprod" required placeholder="Product Name">
+<input id="bprice" type="number" step="0.01" required placeholder="Price in Pi">
+<textarea id="bdesc" placeholder="Description"></textarea>
+<button class="btn" style="width:100%">List My Business</button>
+</form><p id="reg_msg"></p>
+</div>
+</div>
+
+<div id="mall" class="tabpage" style="display:none"><div id="mall_dir"></div></div>
+
+<script>
+const Pi = window.Pi; Pi.init({version:"2.0"});
+let defaultBiz=[
+{cat:"Groceries", name:"Soweto Fresh Market", prod:"Grocery Pack Family", price:2, desc:"Maize, oil, sugar, tea", wa:"082 123 4567"},
+{cat:"Groceries", name:"Pretoria Bulk Grocers", prod:"Bulk Rice 25kg", price:1.5, desc:"Imported rice", wa:"083 222 1111"},
+{cat:"Groceries", name:"Alex Veggie Hub", prod:"Fresh Veg Crate", price:0.8, desc:"Tomatoes, onions, cabbage", wa:"084 555 0001"},
+{cat:"Groceries", name:"JHB Meat Depot", prod:"Meat Combo 10kg", price:3, desc:"Beef, chicken, wors", wa:"082 999 8888"},
+{cat:"Electronics", name:"Gauteng Phone Masters", prod:"Samsung A15 - Refurb", price:12, desc:"Boxed with warranty", wa:"081 444 2222"},
+{cat:"Electronics", name:"Hillbrow Tech Zone", prod:"65\" Smart TV", price:18, desc:"4K UHD Android", wa:"082 333 4444"},
+{cat:"Electronics", name:"Sandton Sound & Light", prod:"DJ Speaker Set", price:15, desc:"15 inch + mixer", wa:"083 777 6666"},
+{cat:"Electronics", name:"PTA Laptop Clinic", prod:"HP Laptop i5", price:20, desc:"8GB/256GB SSD", wa:"084 111 2222"},
+{cat:"Car Dealerships & Spare Parts", name:"WA0397 Auto Sales", prod:"Toyota Hilux 2.8 GD6 2021", price:350, desc:"Full service history", wa:"082 345 6789"},
+{cat:"Car Dealerships & Spare Parts", name:"Gauteng Truck Spares", prod:"34T Side Tipper Axle", price:8, desc:"Original BPW axle", wa:"083 123 9999"},
+{cat:"Car Dealerships & Spare Parts", name:"Benoni Car Yard", prod:"VW Polo Vivo 2020", price:120, desc:"Clean 80k km", wa:"084 222 3333"},
+{cat:"Car Dealerships & Spare Parts", name:"Germiston Parts Hub", prod:"Brake Pads - Trucks", price:0.9, desc:"For all tippers", wa:"082 666 7777"},
+{cat:"Real Estates", name:"Revealed Property SA", prod:"2 Bed in Soweto - Viewing", price:1, desc:"House R650k", wa:"082 000 1111"},
+{cat:"Real Estates", name:"Gauteng Rentals", prod:"Warehouse 500sqm - Isando", price:2.5, desc:"Truck access", wa:"083 000 2222"},
+{cat:"Real Estates", name:"Pretoria Land Sales", prod:"Stand 400sqm - Soshanguve", price:5, desc:"Title deed", wa:"084 000 3333"},
+{cat:"Real Estates", name:"Midrand Estates", prod:"Flat to Rent - Deposit", price:3, desc:"1 bed water incl", wa:"081 000 4444"},
+{cat:"Fuel Stations", name:"Revealed Diesel Hub", prod:"Diesel 500L Bulk", price:10, desc:"WA0397 delivery", wa:"082 555 0199"},
+{cat:"Fuel Stations", name:"Soweto Fuel Point", prod:"Petrol Voucher 100L", price:4, desc:"Any station", wa:"083 555 0299"},
+{cat:"Fuel Stations", name:"Pretoria North Energy", prod:"LPG Gas 19kg Refill", price:1.2, desc:"Swap & go", wa:"084 555 0399"},
+{cat:"Fuel Stations", name:"East Rand Fuel Stop", prod:"Diesel Card 1000L", price:22, desc:"Fleet card", wa:"081 555 0499"},
+{cat:"Hardwares", name:"Marble Floors SA", prod:"Marble Slabs 60x60 - 20sqm", price:6, desc:"Italian polish", wa:"082 111 9900"},
+{cat:"Hardwares", name:"BuildIt Gauteng", prod:"Cement 10 Bags", price:1.8, desc:"PPC Surebuild", wa:"083 222 9900"},
+{cat:"Hardwares", name:"Tool Masters PTA", prod:"Drill Machine Set", price:1.2, desc:"Bosch bits", wa:"084 333 9900"},
+{cat:"Hardwares", name:"Steel & Roofing", prod:"IBR Sheets 6m x10", price:4.5, desc:"0.53mm zinc", wa:"081 444 9900"},
+{cat:"Construction Machinery", name:"Revealed Plant Hire", prod:"Excavator Hire - Day", price:7, desc:"30T with operator", wa:"082 777 0101"},
+{cat:"Construction Machinery", name:"Gauteng TLB Services", prod:"TLB Hire - Day", price:3.5, desc:"JCB 3CX", wa:"083 777 0202"},
+{cat:"Construction Machinery", name:"Tipper Truck Hire", prod:"34T Side Tipper Hire JHB-DBN", price:9, desc:"WA0397 fleet", wa:"084 777 0303"},
+{cat:"Construction Machinery", name:"Crane Hire SA", prod:"Mobile Crane 50T - Day", price:12, desc:"With rigger", wa:"081 777 0404"},
+{cat:"Factories & Warehouses", name:"Isando Cold Storage", prod:"Cold Room 20sqm - Month", price:6, desc:"For groceries -18C", wa:"082 888 0101"},
+{cat:"Factories & Warehouses", name:"Spartan Food Factory", prod:"Maize Milling Slot - Day", price:4, desc:"5 ton capacity", wa:"083 888 0202"},
+{cat:"Factories & Warehouses", name:"Devland Distribution", prod:"Warehouse 1000sqm - Month", price:15, desc:"Forklift included", wa:"084 888 0303"},
+{cat:"Factories & Warehouses", name:"Pretoria West Packers", prod:"Grocery Packing 1000 packs", price:3, desc:"Label + pack", wa:"081 888 0404"},
+];
+let customBiz = JSON.parse(localStorage.getItem('gauteng_hub_custom')||"[]");
+function allBiz(){return [...defaultBiz,...customBiz];}
+function render(){
+let main="", test="", dir="", cats={};
+allBiz().forEach(b=>{
+let card=`<div class="card"><b>${b.name} <span class="badge">${b.price} Pi</span></b><br><small>${b.cat}</small><p>${b.prod}<br><small>${b.desc}</small><br><small>WhatsApp: ${b.wa}</small></p><button class="btn" style="width:100%" onclick="pay(${b.price},true,'${b.prod}')">Pay ${b.price} Pi</button></div>`;
+main+=card; test+=card.replace(/Pay.* Pi/g, `Pay ${b.price} Test-Pi`).replace(',true,',',false,'); if(!cats[b.cat]) cats[b.cat]=""; cats[b.cat]+=card;
+});
+document.getElementById('main_products').innerHTML=main;
+document.getElementById('test_products').innerHTML=test;
+let dhtml=""; for(let c in cats){dhtml+=`<div class="cat">${c}</div>`+cats[c];} document.getElementById('mall_dir').innerHTML=dhtml;
+}
+render();
+function showTab(id,el){document.querySelectorAll('.tabpage').forEach(x=>x.style.display='none');document.getElementById(id).style.display='block';document.querySelectorAll('.t').forEach(x=>x.classList.remove('active'));el.classList.add('active');}
+async function login(){try{Pi.init({version:"2.0", sandbox:false}); const a=await Pi.authenticate(['username','payments'], onIncomplete); document.getElementById('user').innerText="Hi, "+a.user.username;}catch(e){alert(e)}}
+async function pay(amount,isMainnet,memo){const status = isMainnet? document.getElementById('main_status'): document.getElementById('test_status'); try{Pi.init({version:"2.0", sandbox:!isMainnet}); await Pi.authenticate(['username','payments'], onIncomplete); await Pi.createPayment({amount:amount,memo:memo,metadata:{hub:"gauteng"}},{onReadyForServerApproval: (id)=>{status.innerText="Approving "+id+"..."; fetch('/api/approve',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({paymentId:id})})},onReadyForServerCompletion: (id,txid)=>{status.innerText="✅ SUCCESS! TxID: "+txid; fetch('/api/complete',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({paymentId:id,txid:txid})})},onCancel: ()=>{status.innerText="❌ Cancelled"},onError: (e)=>{status.innerText="❌ Failed: "+e}});}catch(e){status.innerText="Error: "+e}}
+function onIncomplete(payment){fetch('/api/complete',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({paymentId:payment.identifier, txid:payment.transaction.txid})});}
+function fixFailed(){Pi.authenticate(['payments'], onIncomplete); document.getElementById('main_status').innerText="Scanning...";}
+function registerBiz(e){e.preventDefault();customBiz.push({cat:document.getElementById('bcat').value, name:document.getElementById('bname').value, prod:document.getElementById('bprod').value, price:parseFloat(document.getElementById('bprice').value), desc:document.getElementById('bdesc').value, wa:document.getElementById('bwa').value});localStorage.setItem('gauteng_hub_custom', JSON.stringify(customBiz));document.getElementById('reg_msg').innerText="✅ LIVE in Mall Directory!";render(); e.target.reset(); return false;}
+</script>
+</body>
+</html>
