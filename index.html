@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html><head><title>Gauteng Shopping Hub - Working + Image</title>
+<script src="https://sdk.minepi.com/pi-sdk.js"></script>
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<style>
+*{box-sizing:border-box}body{margin:0;font-family:Arial;background:#f5f5f5}
+.top{display:flex;justify-content:space-between;padding:12px;background:#fff;border-bottom:1px solid #ddd;position:sticky;top:0;z-index:20}
+.btn{background:#7c3aed;color:#fff;border:0;padding:10px 14px;border-radius:20px;font-weight:bold;cursor:pointer}
+.btnRed{background:#d00000;color:#fff;border:0;padding:12px;border-radius:20px;font-weight:bold;width:100%;margin-top:8px;cursor:pointer}
+.btnGreen{background:#2E7D32;color:#fff;border:0;padding:12px;border-radius:20px;font-weight:bold;width:100%;margin-top:8px;cursor:pointer}
+.tabs{display:flex;background:#111;overflow-x:auto;position:sticky;top:58px;z-index:20}
+.t{flex:0 0 auto;padding:14px 16px;text-align:center;cursor:pointer;color:#ccc;white-space:nowrap;border-right:1px solid #222}
+.t.active{background:#7c3aed;color:#fff}
+.card{background:#fff;margin:10px;border-radius:12px;padding:12px;box-shadow:0 1px 3px #0001}
+.badge{background:#7c3aed;color:#fff;padding:2px 8px;border-radius:10px;font-size:12px}
+.badge3{padding:8px 14px;border-radius:20px;font-weight:bold;margin:4px;font-size:12px;display:inline-block;border:2px solid #ffcc00}
+input,select,textarea{width:100%;padding:11px;margin:5px 0;border:1px solid #ccc;border-radius:8px;font-size:14px}
+.footer{background:#001a4d;color:#fff;padding:20px;text-align:center;margin-top:20px;padding-bottom:80px}
+.clientBox{background:#fff;margin:10px;border-radius:12px;padding:12px;border:2px solid #7c3aed}
+.emailBox{background:#111;color:#fff;padding:10px;border-radius:8px;margin:10px;text-align:center}
+.tabpage{display:none}.tabpage.active{display:block}
+.testBanner{background:#ffcc00;color:#001a4d;padding:8px;text-align:center;font-weight:bold}
+.mallImage{width:100%;height:220px;overflow:hidden;border:3px solid gold;border-radius:12px;margin:10px;box-sizing:border-box}
+.mallImage img{width:100%;height:100%;object-fit:cover}
+</style></head><body>
+
+<!-- MALL IMAGE FROM YOUR GITHUB -->
+<div class="mallImage">
+<img src="https://raw.githubusercontent.com/Ndhlovu36/gauteng-shopping-hub/main/IMG-20260920-WA3111.jpg" alt="Gauteng Shopping Hub">
+</div>
+
+<div class="testBanner">🧪 WORKING INDEX - WITH MALL IMAGE - LOW Pi - NO FIAT</div>
+<div class="top">
+<div><b>GAUTENG<br>SHOPPING HUB</b><br><small>With Image</small></div>
+<div style="text-align:right"><span id="user">Not logged</span><br><button class="btn" onclick="login()">Login Pi</button><br><small id="piStatus">Tap Login</small></div>
+</div>
+<div class="tabs">
+<div class="t" id="tab-mainnet" onclick="showTab('mainnet')">Mainnet</div>
+<div class="t active" id="tab-testnet" onclick="showTab('testnet')">Testnet</div>
+<div class="t" id="tab-register" onclick="showTab('register')">Register</div>
+<div class="t" id="tab-products" onclick="showTab('products')" style="background:#2E7D32;color:#fff">📦 Products</div>
+<div class="t" id="tab-clientinfo" onclick="showTab('clientinfo')">👤 Client</div>
+<div class="t" id="tab-mall" onclick="showTab('mall')">Mall</div>
+</div>
+
+<div id="mainnet" class="tabpage">
+<div class="emailBox">📧 gautengshoppinghub@gmail.com - Pi Only - No Fiat</div>
+<div class="clientBox"><h3>📋 Client Info</h3><input id="clientName" placeholder="Name"><input id="clientPhone" placeholder="Phone"><input id="truckQty" type="number" value="1" min="1"></div>
+<div id="main_products"></div>
+<div class="card"><p id="calcBox" style="background:#111;color:#fff;padding:10px;border-radius:8px">Qty x Pi - 0.01-0.05</p><p id="main_status" style="background:#fff3cd;padding:8px;border-radius:8px">Ready</p><button class="btnRed" onclick="clearPending()">🔴 Clear Pending Payment</button></div>
+</div>
+
+<div id="testnet" class="tabpage active">
+<div class="card"><b>🧪 Testnet - With Mall Image</b><br><div class="emailBox">📧 gautengshoppinghub@gmail.com - Pi Only - 0.01-0.05 Pi</div><button class="btnRed" onclick="clearPending()">🔴 Clear Pending Payment</button><p id="test_status" style="background:#fff3cd;padding:8px;border-radius:8px">Working + Image</p></div><div id="test_products"></div>
+</div>
+
+<div id="register" class="tabpage"><div class="card"><h3>Register Business</h3><input id="bname" placeholder="Business Name"><select id="bcat"><option>Groceries</option><option>Electronics</option><option>Logistics & Transport</option></select><input id="bprod" placeholder="Product"><input id="bprice" type="number" step="0.01" placeholder="Price Pi 0.01-0.05"><textarea id="bdesc" placeholder="Description"></textarea><button class="btn" style="width:100%" onclick="registerBiz()">List Business</button><p id="reg_msg"></p></div></div>
+
+<div id="products" class="tabpage"><div class="clientBox" style="border-color:#2E7D32"><h3>📦 Products</h3><input id="prodName" placeholder="Product Name"><select id="prodCategory"><option>Groceries</option><option>Electronics</option></select><input id="prodPricePi" type="number" step="0.01" placeholder="0.01-0.05"><button class="btnGreen" onclick="addProduct()">➕ ADD PRODUCT</button></div><div class="card"><h3>Products: <span id="prodCount">0</span></h3><div id="productListDisplay">No products</div></div></div>
+
+<div id="clientinfo" class="tabpage"><div class="clientBox"><h3>👤 Client Info</h3><input id="c_fullname" placeholder="Full Name"><input id="c_phone" placeholder="Phone"><button class="btn" style="width:100%" onclick="showTab('register')">Save</button></div></div>
+
+<div id="mall" class="tabpage">
+<div class="mallImage"><img src="https://raw.githubusercontent.com/Ndhlovu36/gauteng-shopping-hub/main/IMG-20260920-WA3111.jpg" alt="Mall"></div>
+<div class="emailBox">📧 Working - With Image - Pi Only</div><div id="mall_dir"></div></div>
+
+<script>
+function showTab(id){document.querySelectorAll('.tabpage').forEach(function(p){p.style.display='none';p.classList.remove('active');});document.querySelectorAll('.t').forEach(function(t){t.classList.remove('active');});var page=document.getElementById(id);if(page){page.style.display='block';page.classList.add('active');}var tabBtn=document.getElementById('tab-'+id);if(tabBtn) tabBtn.classList.add('active');}
+var defaultBiz=[
+{cat:"Groceries",name:"Soweto Fresh Market",prod:"Family Grocery Pack",price:0.01,desc:"Maize meal, oil, sugar - Pi only - No fiat",wa:"082 123 4567",email:"gautengshoppinghub@gmail.com"},
+{cat:"Electronics",name:"Phone Masters",prod:"Samsung A15 Test",price:0.02,desc:"Boxed - Pi only - No fiat",wa:"081 444 2222",email:"gautengshoppinghub@gmail.com"}
+];
+var customBiz=JSON.parse(localStorage.getItem('gauteng_hub_custom')||"[]");
+var customProducts=JSON.parse(localStorage.getItem('gauteng_products')||"[]");
+function allBiz(){return [].concat(defaultBiz).concat(customBiz).concat(customProducts)}
+function render(){
+  var main="",test="",dir="",cats={};
+  allBiz().forEach(function(b){
+    var qty=document.getElementById('truckQty')?document.getElementById('truckQty').value:1; var total=(b.price*qty).toFixed(4);
+    var card='<div class="card"><b>'+b.name+' <span class="badge">'+b.price+' Pi</span></b><br><small>'+b.cat+'</small><p>'+b.prod+'<br><small>'+b.desc+'</small></p><button class="btn" style="width:100%" onclick="pay('+b.price+',true,\''+b.prod+'\')">Pay '+total+' Pi</button></div>';
+    main+=card; test+=card; if(!cats[b.cat]) cats[b.cat]=""; cats[b.cat]+=card;
+  });
+  document.getElementById('main_products').innerHTML=main;
+  document.getElementById('test_products').innerHTML=test;
+  var dhtml=""; for(var c in cats){ dhtml+='<div class="card"><b>'+c+'</b></div>'+cats[c]; }
+  var md=document.getElementById('mall_dir'); if(md) md.innerHTML=dhtml;
+}
+render();
+async function login(){ if(!window.Pi){ alert('Open in Pi Browser'); return; } Pi.init({version:"2.0"}); var auth=await Pi.authenticate(['username','payments'], function(p){}); document.getElementById('user').innerText="Hi, "+auth.user.username; document.getElementById('piStatus').innerText="✅ "+auth.user.username; }
+async function pay(amount,isMainnet,memo){ var qty=parseInt(document.getElementById('truckQty').value)||1; var total=amount*qty; var status=isMainnet?document.getElementById('main_status'):document.getElementById('test_status'); if(status) status.innerText="Paying "+total+"..."; if(!window.Pi){ alert('Open in Pi Browser'); return; } try{ Pi.init({version:"2.0", sandbox:!isMainnet}); await Pi.authenticate(['username','payments'], function(p){}); await Pi.createPayment({amount:total, memo:memo.substring(0,28)}, {onReadyForServerApproval:function(id){},onReadyForServerCompletion:function(id,txid){ if(status) status.innerText="✅ SUCCESS "+total+" TxID: "+txid; },onCancel:function(){},onError:function(err){}}); }catch(e){} }
+function clearPending(){ var st=document.getElementById('main_status'); if(st) st.innerText="✅ Cleared!"; var st2=document.getElementById('test_status'); if(st2) st2.innerText="✅ Cleared!"; }
+function addProduct(){ var name=document.getElementById('prodName').value; var cat=document.getElementById('prodCategory').value; var price=parseFloat(document.getElementById('prodPricePi').value); if(!name||!price) return; customProducts.push({cat:cat,name:"My Biz",prod:name,price:price,desc:"Pi only",wa:"082",email:"gautengshoppinghub@gmail.com"}); localStorage.setItem('gauteng_products', JSON.stringify(customProducts)); render(); }
+function registerBiz(){ var bname=document.getElementById('bname').value; var bcat=document.getElementById('bcat').value; var bprod=document.getElementById('bprod').value; var bprice=parseFloat(document.getElementById('bprice').value); var bdesc=document.getElementById('bdesc').value; if(!bname||!bprice) return; customBiz.push({cat:bcat,name:bname,prod:bprod,price:bprice,desc:bdesc,wa:"082",email:"gautengshoppinghub@gmail.com"}); localStorage.setItem('gauteng_hub_custom', JSON.stringify(customBiz)); document.getElementById('reg_msg').innerText="✅ LIVE"; render(); }
+</script></body></html>
