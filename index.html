@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html><head><title>Gauteng Shopping Hub - Pi Mall</title>
+<script src="https://sdk.minepi.com/pi-sdk.js"></script>
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<style>
+*{box-sizing:border-box}body{margin:0;font-family:Arial;background:#f5f5f5}
+.top{display:flex;justify-content:space-between;padding:12px;background:#fff;border-bottom:1px solid #ddd;position:sticky;top:0;z-index:10}
+.btn{background:#7c3aed;color:#fff;border:0;padding:10px 14px;border-radius:20px;font-weight:bold;cursor:pointer}
+.btnRed{background:#d00000;color:#fff;border:0;padding:10px;border-radius:20px;font-weight:bold;width:100%;margin-top:8px;cursor:pointer}
+.btnGreen{background:#2E7D32;color:#fff;border:0;padding:10px;border-radius:20px;font-weight:bold;width:100%;margin-top:8px;cursor:pointer}
+.tabs{display:flex;background:#111;overflow:auto;position:sticky;top:50px;z-index:10}
+.t{flex:1;padding:12px 8px;text-align:center;cursor:pointer;color:#ccc;white-space:nowrap;font-size:12px}
+.t.active{background:#7c3aed;color:#fff}
+.card{background:#fff;margin:10px;border-radius:12px;padding:12px;box-shadow:0 1px 3px #0001}
+.badge{background:#7c3aed;color:#fff;padding:2px 8px;border-radius:10px;font-size:12px}
+.badge3{padding:8px 14px;border-radius:20px;font-weight:bold;margin:4px;font-size:12px;display:inline-block;border:2px solid #ffcc00}
+.badge3.iso{background:#001a4d;color:#fff;border-color:#fff}
+.badge3.open{background:#ffcc00;color:#001a4d;border-color:#001a4d}
+.badge3.pi{background:#6a1b9a;color:#fff;border-color:#ffcc00}
+.cat{background:#111;color:#fff;padding:8px 12px;margin:12px 10px 0 10px;border-radius:8px}
+input,select,textarea{width:100%;padding:10px;margin:5px 0;border:1px solid #ccc;border-radius:8px}
+.footer{background:#001a4d;color:#fff;padding:20px;text-align:center;margin-top:20px;padding-bottom:100px}
+.clientBox{background:#fff;margin:10px;border-radius:12px;padding:12px;border:2px solid #7c3aed}
+.emailBox{background:#111;color:#fff;padding:10px;border-radius:8px;margin:10px;text-align:center}
+.emailBox a{color:#ffcc00;text-decoration:none;font-weight:bold}
+</style></head><body>
+<div class="top">
+<div><b>GAUTENG<br>SHOPPING HUB</b><br><small>Pi Mainnet Mall</small><br><span id="netLabel" style="font-size:10px;color:#7c3aed">TESTNET</span></div>
+<div style="text-align:right"><span id="user">Not logged</span><br><button class="btn" onclick="login()">Login Pi</button><br><small id="piStatus">Tap Login</small></div>
+</div>
+<div class="tabs">
+<div class="t active" onclick="showTab('mainnet',this)">Mainnet</div>
+<div class="t" onclick="showTab('testnet',this)">Testnet</div>
+<div class="t" onclick="showTab('register',this)">Register</div>
+<div class="t" onclick="showTab('products',this)" style="background:#2E7D32;color:#fff">📦 Products</div>
+<div class="t" onclick="showTab('clientinfo',this)">👤 Client</div>
+<div class="t" onclick="showTab('mall',this)">Mall</div>
+</div>
+<div id="mainnet" class="tabpage">
+<div class="emailBox">📧 Contact: <a href="mailto:gautengshoppinghub@gmail.com">gautengshoppinghub@gmail.com</a></div>
+<div class="clientBox">
+<h3>📋 Client Information</h3>
+<input id="clientName" placeholder="Client Full Name"><input id="clientPhone" placeholder="Phone"><input id="clientEmail" placeholder="Email">
+<input id="clientPiUser" placeholder="Pi Username auto" readonly style="background:#eee">
+<input id="address" placeholder="Delivery Address"><input id="wa" placeholder="WhatsApp Number">
+<input id="truckQty" type="number" value="1" min="1" placeholder="Quantity">
+</div>
+<div id="main_products"></div>
+<div class="card">
+<p id="calcBox" style="background:#111;color:#fff;padding:10px;border-radius:8px">Qty x Pi Price</p>
+<p id="main_status" style="background:#fff3cd;padding:8px;border-radius:8px"></p>
+<button class="btn" style="width:100%;background:#000" onclick="fixFailed()">🔧 FIX FAILED TRANSACTIONS</button>
+<button class="btnRed" onclick="clearPending()">🔴 Clear Pending Payment</button>
+</div>
+<div class="footer" style="margin:10px;border-radius:12px">
+<b style="color:#ffcc00;font-size:16px">GAUTENG SHOPPING HUB - PI MALL</b><br>
+<span style="font-size:13px">📧 gautengshoppinghub@gmail.com</span><br><br>
+<span class="badge3 iso">✓ ISO 20022 Certified</span>
+<span class="badge3 open">✓ Open Standards</span>
+<span class="badge3 pi">π Pi Network Verified</span><br><br>
+<span style="font-size:11px">© 2026 | Reg: 2024/163979/07 | 91 Cities | Mainnet & Testnet | Client Info | Quantity | Product Tab | Clear Pending<br>Contact: gautengshoppinghub@gmail.com</span>
+</div>
+</div>
+<div id="testnet" class="tabpage" style="display:none">
+<div class="card"><b>Testnet Mode</b> - For approval<br>
+<div class="emailBox">📧 <a href="mailto:gautengshoppinghub@gmail.com">gautengshoppinghub@gmail.com</a></div>
+<button class="btnRed" onclick="clearPending()">🔴 Clear Pending Payment</button>
+<p id="test_status" style="background:#fff3cd;padding:8px;border-radius:8px"></p>
+<span class="badge3 iso">✓ ISO 20022</span><span class="badge3 open">✓ Open Standards</span><span class="badge3 pi">π Pi Verified</span>
+</div>
+<div id="test_products"></div>
+</div>
+<div id="register" class="tabpage" style="display:none">
+<div class="card"><h3>Register Business</h3>
+<div class="emailBox">Support: gautengshoppinghub@gmail.com</div>
+<form onsubmit="return registerBiz(event)">
+<input id="bname" required placeholder="Business Name">
+<select id="bcat" required><option value="">Category</option><option>Groceries</option><option>Electronics</option><option>Car Dealerships & Spare Parts</option><option>Real Estates</option><option>Fuel Stations</option><option>Hardwares</option><option>Construction Machinery</option><option>Factories & Warehouses</option></select>
+<input id="bwa" required placeholder
+="Physical Address"><input id="c_city" placeholder="City: Vereeniging / JHB / PTA"><input id="c_pi" placeholder="Pi Username">
+<textarea placeholder="Delivery Instructions"></textarea>
+<button class="btn" style="width:100%" onclick="showTab('register',document.querySelectorAll('.t')[2])">Save Client Info & Register</button>
+<div style="text-align:center;margin-top:12px"><span class="badge3 iso">✓ ISO 20022</span><span class="badge3 open">✓ Open Standards</span><span class="badge3 pi">π Pi Verified</span></div>
+</div>
+</div>
+<div id="mall" class="tabpage" style="display:none">
+<div class="emailBox">📧 gautengshoppinghub@gmail.com - Mall Directory - 91 Cities</div>
+<div id="mall_dir"></div>
+<div class="footer" style="margin:10px;border-radius:12px"><b style="color:#ffcc00">GAUTENG SHOPPING HUB</b><br>📧 gautengshoppinghub@gmail.com<br><br><span class="badge3 iso">✓ ISO 20022</span><span class="badge3 open">✓ Open Standards</span><span class="badge3 pi">π Pi Verified</span></div>
+</div>
+<script>
+let currentNet='mainnet';let PiSDK=window.Pi;try{PiSDK.init({version:"2.0"})}catch(e){}
+let defaultBiz=[
+{cat:"Groceries",name:"Soweto Fresh Market",prod:"Grocery Pack Family",price:2,desc:"Maize, oil, sugar",wa:"082 123 4567"},
+{cat:"Electronics",name:"Phone Masters",prod:"Samsung A15",price:12,desc:"Boxed warranty",wa:"081 444 2222"},
+{cat:"Car Dealerships & Spare Parts",name:"WA0397 Auto Sales",prod:"Toyota Hilux 2021",price:350,desc:"Full service",wa:"082 345 6789"},
+{cat:"Real Estates",name:"Revealed Property",prod:"2 Bed Soweto",price:1,desc:"House R650k",wa:"082 000 1111"},
+{cat:"Fuel Stations",name:"Revealed Diesel Hub",prod:"Diesel 500L",price:10,desc:"WA0397 delivery",wa:"082 555 0199"},
+{cat:"Hardwares",name:"Marble Floors SA",prod:"Marble Slabs 20sqm",price:6,desc:"Italian polish",wa:"082 111 9900"},
+{cat:"Construction Machinery",name:"Revealed Plant Hire",prod:"Excavator Hire Day",price:7,desc:"30T operator",wa:"082 777 0101"},
+{cat:"Factories & Warehouses",name:"Isando Cold Storage",prod:"Cold Room 20sqm Month",price:6,desc:"-18C",wa:"082 888 0101"},
+];
+let customBiz=JSON.parse(localStorage.getItem('gauteng_hub_custom')||"[]");
+let customProducts=JSON.parse(localStorage.getItem('gauteng_products')||"[]");
+function allBiz(){return [...defaultBiz,...customBiz,...customProducts]}
+function render(){
+let main="",test="",dir="",cats={};
+allBiz().forEach(b=>{
+let qty=document.getElementById('truckQty')?.value||1;let total=(b.price*qty).toFixed(2);
+let card=`<div class="card"><b>${b.name} <span class="badge">${b.price} Pi</span></b><br><small>${b.cat}</small><p>${b.prod}<br><small>${b.desc}</small><br><small>WA: ${b.wa}</small></p><button class="btn" style="width:100%" onclick="pay(${b.price},true,'${b.prod}')">Pay ${total} Pi Qty ${qty}</button></div>`;
+main+=card;test+=card.replace(',true,',',false,');if(!cats[b.cat])cats[b.cat]="";cats[b.cat]+=card;
+});
+document.getElementById('main_products').innerHTML=main;
+document.getElementById('test_products').innerHTML=test;
+let dhtml="";for(let c in cats){dhtml+=`<div class="cat">${c}</div>`+cats[c];}document.getElementById('mall_dir').innerHTML=dhtml;
+}
+render();
+function showTab(id,el){document.querySelectorAll('.tabpage').forEach(x=>x.style.display='none');document.getElementById(id).style.display='block';document.querySelectorAll('.t').forEach(x=>x.classList.remove('active'));el.classList.add('active');currentNet=id;}
+async function login(){try{PiSDK.init({version:"2.0",sandbox:currentNet!='mainnet'});const a=await PiSDK.authenticate(['username','payments'],onIncomplete);document.getElementById('user').innerText="Hi, "+a.user.username;document.getElementById('piStatus').innerText="✅ "+a.user.username;document.getElementById('clientName').value=a.user.username;document.getElementById('clientPiUser').value=a.user.username;document.getElementById('c_pi').value=a.user.username;}catch(e){alert(e.message||e)}}
+async function pay(amount,isMainnet,memo){let qty=parseInt(document.getElementById('truckQty')?.value)||1;let total=amount*qty;let status=isMainnet?document.getElementById('main_status'):document.getElementById('test_status');let client=document.getElementById('clientName')?.value||"Client";try{PiSDK.init({version:"2.0",sandbox:!isMainnet});await PiSDK.authenticate(['username','payments'],onIncomplete);status.innerText="Paying Pi "+total+" Qty "+qty+"...";await PiSDK.createPayment({amount:total,memo:memo.substring(0,28),metadata:{client:client,qty:qty}},{onReadyForServerApproval:(id)=>{status.innerText="Approving "+id;fetch('/api/approve',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({paymentId:id})})},onReadyForServerCompletion:(id,txid)=>{status.innerText="✅ SUCCESS Pi "+total+" TxID: "+txid;fetch('/api/complete',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({paymentId:id,txid:txid})})},onCancel:()=>{status.innerText="❌ Cancelled"},onError:(e)=>{status.innerText="❌ Failed: "+e.message}});}catch(e){status.innerText="Error: "+(e.message||e)}}
+function onIncomplete(p){fetch('/api/complete',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({paymentId:p.identifier,txid:p.transaction.txid})});}
+async function clearPending(){let st=document.getElementById('main_status');let st2=document.getElementById('test_status');let target=currentNet=='testnet'?st2:st;if(!target)target=st;target.innerText="🔴 Clearing pending...";try{PiSDK.init({version:"2.0",sandbox:currentNet!='mainnet'});await PiSDK.authenticate(['username','payments'],onIncomplete);target.innerText="✅ Pending cleared!";target.style.background="#d4edda";}catch(e){target.innerText="Error: "+e.message}}
+function fixFailed(){PiSDK.authenticate(['username','payments'],onIncomplete);document.getElementById('main_status').innerText="Scanning failed transactions... Contact: gautengshoppinghub@gmail.com";}
+function addProduct(){let name=document
