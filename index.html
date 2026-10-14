@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html><head><title>Gauteng Hub - FINAL INTEGRATED 4/4 - 62 Products - Low Pi No Fiat</title>
+<script src="https://sdk.minepi.com/pi-sdk.js"></script>
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<style>
+*{box-sizing:border-box}body{margin:0;font-family:Arial;background:#f5f5f5}
+.top{display:flex;justify-content:space-between;padding:12px;background:#fff;border-bottom:1px solid #ddd;position:sticky;top:0;z-index:20}
+.btn{background:#7c3aed;color:#fff;border:0;padding:10px 14px;border-radius:20px;font-weight:bold;cursor:pointer}
+.btnRed{background:#d00000;color:#fff;border:0;padding:12px;border-radius:20px;font-weight:bold;width:100%;margin-top:8px;cursor:pointer}
+.btnGreen{background:#2E7D32;color:#fff;border:0;padding:12px;border-radius:20px;font-weight:bold;width:100%;margin-top:8px;cursor:pointer}
+.tabs{display:flex;background:#111;overflow-x:auto;position:sticky;top:58px;z-index:20}
+.t{flex:0 0 auto;padding:14px 16px;text-align:center;cursor:pointer;color:#ccc;white-space:nowrap;border-right:1px solid #222}
+.t.active{background:#7c3aed;color:#fff}
+.card{background:#fff;margin:10px;border-radius:12px;padding:12px;box-shadow:0 1px 3px #0001}
+.badge{background:#7c3aed;color:#fff;padding:2px 8px;border-radius:10px;font-size:12px}
+.badge3{padding:6px 12px;border-radius:20px;font-weight:bold;margin:3px;font-size:11px;display:inline-block;border:2px solid #ffcc00}
+.badgeLog{background:#001a4d;color:#ffcc00;padding:3px 10px;border-radius:12px;font-size:11px;font-weight:bold;border:2px solid #ffcc00}
+.badgeAgri{background:#0a2a12;color:#2ecc71;padding:3px 10px;border-radius:12px;font-size:11px;font-weight:bold;border:2px solid gold}
+.badgeMarble{background:#0d3d2e;color:#00e676;padding:3px 10px;border-radius:12px;font-size:11px;font-weight:bold;border:2px solid gold}
+.badgeBus{background:#0a1931;color:gold;padding:3px 10px;border-radius:12px;font-size:11px;font-weight:bold;border:2px solid gold}
+.cat{background:#111;color:#fff;padding:8px 12px;margin:12px 10px 0 10px;border-radius:8px;display:flex;justify-content:space-between;align-items:center}
+input,select,textarea{width:100%;padding:11px;margin:5px 0;border:1px solid #ccc;border-radius:8px;font-size:14px}
+.footer{background:#001a4d;color:#fff;padding:20px;text-align:center;margin-top:20px;padding-bottom:80px;font-size:11px}
+.clientBox{background:#fff;margin:10px;border-radius:12px;padding:12px;border:2px solid #7c3aed}
+.emailBox{background:#111;color:#fff;padding:10px;border-radius:8px;margin:10px;text-align:center;font-size:11px}
+.emailBox a{color:#ffcc00;text-decoration:none;font-weight:bold;word-break:break-all}
+.tabpage{display:none}.tabpage.active{display:block}
+.testBanner{background:#00e676;color:#001a4d;padding:8px;text-align:center;font-weight:bold;font-size:12px}
+.bizHeader{background:#001a4d;color:#fff;padding:10px;border-radius:8px;margin:10px 10px 0 10px;display:flex;gap:10px;align-items:center;font-size:12px}
+</style></head><body>
+<div class="testBanner">✅ FINAL MALL - 4/4 APPS INTEGRATED - 62 PRODUCTS - LOW Pi 0.01-0.05 - NO FIAT - READY FOR PI APPROVAL</div>
+<div class="top">
+<div><b>GAUTENG<br>SHOPPING HUB</b><br><small>FINAL - 62 Products</small><br><span style="font-size:10px;color:green">4/4 Apps - Low Pi - No Fiat</span></div>
+<div style="text-align:right"><span id="user">Not logged</span><br><button class="btn" onclick="login()">Login Pi</button><br><small id="piStatus">Tap Login</small></div>
+</div>
+<div class="tabs">
+<div class="t" id="tab-mainnet" onclick="showTab('mainnet')">Mainnet</div>
+<div class="t active" id="tab-testnet" onclick="showTab('testnet')">Testnet</div>
+<div class="t" id="tab-register" onclick="showTab('register')">Register</div>
+<div class="t" id="tab-products" onclick="showTab('products')" style="background:#2E7D32;color:#fff">📦 Products</div>
+<div class="t" id="tab-clientinfo" onclick="showTab('clientinfo')">👤 Client</div>
+<div class="t" id="tab-mall" onclick="showTab('mall')">Mall</div>
+</div>
+
+<div id="mainnet" class="tabpage">
+<div class="emailBox">📧 FINAL - 5 Emails: gautengshoppinghub@gmail.com | revealed.logistics@gmail.com | agriequipmentmarket@gmail.com | marblefloorssa@gmail.com | revelationbuscompany@gmail.com - NO FIAT - Pi Only 0.01-0.05 Pi</div>
+<div class="clientBox"><h3>📋 Client Info - FINAL MALL - 62 Products - Pi Only</h3>
+<input id="clientName" placeholder="Client Full Name"><input id="clientPhone" placeholder="Phone"><input id="clientEmail" placeholder="Email"><input id="clientPiUser" placeholder="Pi Username auto" readonly style="background:#eee"><input id="address" placeholder="Delivery Address"><input id="wa" placeholder="WhatsApp Number"><input id="truckQty" type="number" value="1" min="1" placeholder="Quantity"></div>
+<div id="main_products"></div>
+<div class="card"><p id="calcBox" style="background:#111;color:#fff;padding:10px;border-radius:8px">FINAL - 62 Products - Qty x Pi - 0.01-0.05 Pi - No fiat - 4/4 Apps Integrated</p><p id="main_status" style="background:#fff3cd;padding:8px;border-radius:8px">Ready - FINAL INTEGRATED 4/4 - 62 Products</p><button class="btn" style="width:100%;background:#000" onclick="fixFailed()">🔧 FIX FAILED TRANSACTIONS</button><button class="btnRed" onclick="clearPending()">🔴 Clear Pending Payment</button></div>
+<div class="footer" style="margin:10px;border-radius:12px"><b style="color:#ffcc00">GAUTENG SHOPPING HUB - FINAL - 62 PRODUCTS - 4/4 APPS</b><br>📧 gautengshoppinghub@gmail.com | revealed.logistics@gmail.com | agriequipmentmarket@gmail.com | marblefloorssa@gmail.com | revelationbuscompany@gmail.com<br><br><span class="badge3" style="background:#001a4d;color:#fff">✓ ISO 20022</span><span class="badge3" style="background:#ffcc00;color:#001a4d">✓ Open Standards</span><span class="badge3" style="background:#6a1b9a;color:#fff">π Pi Verified</span><br>© 2026 | Reg 2024/163979/07 | 91 Cities | FINAL INTEGRATED MALL - No Fiat - Pi Only 0.01-0.05 Pi - Ready for Pi Approval</div>
+</div>
+
+<div id="testnet" class="tabpage active">
+<div class="card"><b>✅ FINAL MALL - 4/4 APPS - 62 PRODUCTS - LOW Pi 0.01-0.05 - NO FIAT - READY FOR PI APPROVAL</b><br>
+<div class="emailBox">📧 5 Emails - FINAL INTEGRATED - No Fiat - Pi Only - Test Prices 0.01-0.05 Pi - ISO 20022</div>
+<div style="background:#e8f5e9;padding:8px;border-radius:8px;margin:8px 0;font-size:11px">✅ FINAL INTEGRATED: 4/4 Apps - 62 Products<br>• REVEALED LOGISTICS PTY (LTD) - 8 Trucks - Reg 2024/163979/07 - 0.02-0.05 Pi - revealed.logistics@gmail.com<br>• AGRICULTURAL EQUIPMENT MARKET - 28 Tractors - 0.01-0.05 Pi - agriequipmentmarket@gmail.com - Pan Africa<br>• MARBLE FLOORS SA (PTY) LTD - 16 Products - 0.01-0.03 Pi - marblefloorssa@gmail.com<br>• REVELATION BUS COMPANY PTY (LTD) - 10 Routes - 0.01-0.05 Pi - 91 Cities - revelationbuscompany@gmail.com<br>All prices LOW TEST 0.01-0.05 Pi - NO FIAT - Pi only - ISO 20022 - Open Standards - Pi Verified<br>✅ READY FOR PI NETWORK APPROVAL!</div>
+<button class="btnRed" onclick="clearPending()">🔴 Clear Pending Payment</button><p id="test_status" style="background:#fff3cd;padding:8px;border-radius:8px">FINAL - 62 Products - Low Pi - No Fiat - Ready for Approval</p></div><div id="test_products"></div>
+</div>
+
+<div id="register" class="tabpage"><div class="card"><h3>Register Business - FINAL MALL - Pi Only - No Fiat</h3><div class="emailBox">Support: gautengshoppinghub@gmail.com - 4/4 Apps Integrated - Pi only 0.01-0.05 Pi - No fiat</div><input id="bname" placeholder="Business Name"><select id="bcat"><option value="">Category</option><option>Groceries</option><option>Electronics</option><option>Logistics & Transport</option><option>Agricultural Equipment</option><option>Hardwares</option><option>Bus Transport</option><option>Car Dealerships & Spare Parts</option><option>Real Estates</option><option>Fuel Stations</option></select><input id="bwa" placeholder="WhatsApp"><input id="bwallet" placeholder="Pi Wallet G..."><input id="bprod" placeholder="Product Name"><input id="bprice" type="number" step="0.01" min="0.01" max="1" placeholder="Price Pi - 0.01 to 0.05 for test"><input id="bqty" type="number" value="1" placeholder="Quantity"><textarea id="bdesc" placeholder="Description - Pi only, no fiat"></textarea><button class="btn" style="width:100%" onclick="registerBiz()">List Business - Pi Only</button><p id="reg_msg"></p></div></div>
