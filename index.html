@@ -1,0 +1,203 @@
+<!DOCTYPE html><html><head><title>Gauteng Shopping Hub - Delivery costs included + Save Orders + Soroban Ready</title>
+<script src="https://sdk.minepi.com/pi-sdk.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<style>
+*{box-sizing:border-box}body{margin:0;font-family:Arial;background:#f5f5f5}
+.top{display:flex;justify-content:space-between;padding:12px;background:#fff;border-bottom:1px solid #ddd;position:sticky;top:0;z-index:20}
+.btn{background:#7c3aed;color:#fff;border:0;padding:10px 14px;border-radius:20px;font-weight:bold;cursor:pointer}
+.btnRed{background:#d00000;color:#fff;border:0;padding:12px;border-radius:20px;font-weight:bold;width:100%;margin-top:8px;cursor:pointer}
+.btnGreen{background:#2E7D32;color:#fff;border:0;padding:12px;border-radius:20px;font-weight:bold;width:100%;margin-top:8px;cursor:pointer}
+.tabs{display:flex;background:#111;overflow-x:auto;position:sticky;top:58px;z-index:20}
+.t{flex:0 0 auto;padding:14px 16px;text-align:center;cursor:pointer;color:#ccc;white-space:nowrap;border-right:1px solid #222}
+.t.active{background:#7c3aed;color:#fff}
+.card{background:#fff;margin:10px;border-radius:12px;padding:12px;box-shadow:0 1px 3px #0001}
+.badge{background:#7c3aed;color:#fff;padding:2px 8px;border-radius:10px;font-size:12px}
+.badge3{padding:8px 14px;border-radius:20px;font-weight:bold;margin:4px;font-size:12px;display:inline-block;border:2px solid #ffcc00}
+.badge-incl{background:#00c853;color:#fff;padding:3px 8px;border-radius:10px;font-size:10px;font-weight:bold;display:inline-block}
+.badge-soroban{background:#6a1b9a;color:#ffcc00;padding:3px 8px;border-radius:10px;font-size:10px;font-weight:bold;border:1px solid gold;display:inline-block}
+input,select,textarea{width:100%;padding:11px;margin:5px 0;border:1px solid #ccc;border-radius:8px;font-size:14px}
+.qtyRow{display:flex;align-items:center;gap:8px;margin:10px}
+.qtyBtn{background:#111;color:#fff;border:0;width:44px;height:44px;border-radius:10px;font-size:22px;font-weight:bold;cursor:pointer}
+.qtyInput{width:70px;text-align:center;font-weight:bold;font-size:18px}
+.clientBox{background:#fff;margin:10px;border-radius:12px;padding:12px;border:2px solid #7c3aed}
+.emailBox{background:#111;color:#fff;padding:10px;border-radius:8px;margin:10px;text-align:center}
+.tabpage{display:none}.tabpage.active{display:block}
+.mallImage{width:100%;height:240px;overflow:hidden}
+.mallImage img{width:100%;height:100%;object-fit:cover}
+.order-card{background:#fff;border-left:4px solid #00c853;margin:8px 0;padding:10px;border-radius:8px;font-size:12px;text-align:left}
+</style></head><body>
+
+<div class="mallImage"><img src="https://raw.githubusercontent.com/Ndhlovu36/gauteng-shopping-hub/main/IMG-20260920-WA3111.jpg"></div>
+
+<div class="top"><div><b>GAUTENG<br>SHOPPING HUB</b><br><small style="background:#00c853;color:#fff;padding:2px 6px;border-radius:8px">Delivery costs included</small><br><small id="sorobanBadge" style="background:#6a1b9a;color:#ffcc00;border:1px solid gold;padding:2px 6px;border-radius:8px">⚡ SOROBAN READY</small></div><div style="text-align:right"><span id="user">Hi, Ndhlovu36</span><br><button class="btn" onclick="login()">Login Pi</button><br><small id="piStatus">Login</small></div></div>
+
+<div class="tabs">
+<div class="t" id="tab-mainnet" onclick="showTab('mainnet')">Mainnet</div>
+<div class="t active" id="tab-testnet" onclick="showTab('testnet')">Testnet</div>
+<div class="t" id="tab-register" onclick="showTab('register')">Register Business</div>
+<div class="t" id="tab-products" onclick="showTab('products')" style="background:#2E7D32;color:#fff">📦 Add Product</div>
+<div class="t" id="tab-clientinfo" onclick="showTab('clientinfo')">👤 Client Info</div>
+<div class="t" id="tab-mall" onclick="showTab('mall')">Mall</div>
+<div class="t" id="tab-orders" onclick="showTab('orders')">📋 Orders</div>
+</div>
+
+<div class="card" style="display:flex;justify-content:center"><div class="qtyRow"><button class="qtyBtn" onclick="changeQty(-1)">−</button><input id="truckQty" class="qtyInput" type="number" value="1" min="1" readonly><button class="qtyBtn" onclick="changeQty(1)">+</button><span style="font-weight:bold;margin-left:8px">Qty <span class="badge-incl">Delivery incl.</span></span></div></div>
+
+<div id="mainnet" class="tabpage">
+<div class="card"><div style="text-align:center"><span class="badge3" style="background:#001a4d;color:#fff">✓ ISO 20022</span><span class="badge3" style="background:#ffcc00;color:#001a4d">✓ Open Standards</span><span class="badge3" style="background:#6a1b9a;color:#fff">π Pi Verified</span><span class="badge3" style="background:#00c853;color:#fff">✓ Delivery costs included</span><span class="badge3" style="background:#6a1b9a;color:#ffcc00;border:1px solid gold">⚡ Soroban Ready</span></div><div class="emailBox">📧 Pi Only - 0.01-0.05 Pi - Delivery costs included - No Expiry</div><p id="main_status" style="background:#d4edda;padding:8px;border-radius:8px;text-align:center">✅ Ready - Delivery incl.</p><button class="btnRed" onclick="clearPending()">🔴 Clear Pending Payment</button></div><div id="main_products"></div>
+</div>
+
+<div id="testnet" class="tabpage active">
+<div class="card">
+<div style="text-align:center"><span class="badge3" style="background:#001a4d;color:#fff">✓ ISO 20022</span><span class="badge3" style="background:#ffcc00;color:#001a4d">✓ Open Standards</span><span class="badge3" style="background:#6a1b9a;color:#fff">π Pi Verified</span><span class="badge3" style="background:#00c853;color:#fff">✓ Delivery costs included</span><span class="badge3" style="background:#6a1b9a;color:#ffcc00;border:1px solid gold">⚡ Soroban Ready - Oct 16 2026</span></div>
+<div class="emailBox">📧 gautengshoppinghub@gmail.com - Pi Only - Delivery costs included</div>
+<button class="btnRed" onclick="clearPending()">🔴 Clear Pending Payment</button>
+<p id="test_status" style="background:#d4edda;padding:8px;border-radius:8px;text-align:center;margin-top:8px">✅ Ready to Pay - Delivery costs included - Fixed No Expiry</p>
+</div>
+<div id="test_products"></div>
+</div>
+
+<div id="register" class="tabpage"><div class="card"><h3>Register Business Portal - Delivery costs included</h3><div style="text-align:center"><span class="badge3" style="background:#001a4d;color:#fff">✓ ISO 20022</span><span class="badge3" style="background:#ffcc00;color:#001a4d">✓ Open Standards</span><span class="badge3" style="background:#6a1b9a;color:#fff">π Pi Verified</span></div><input id="bname" placeholder="Business Name"><select id="bcat"><option>Groceries</option><option>Electronics</option><option>Logistics & Transport</option><option>Car Dealerships</option><option>Real Estates</option><option>Fuel Stations</option><option>Hardwares</option></select><input id="bwa" placeholder="WhatsApp"><input id="bemail" type="email" placeholder="Business Email Address - Required"><input id="bwallet" placeholder="Pi Wallet G..."><input id="bprod" placeholder="Product Name"><input id="bprice" type="number" step="0.01" placeholder="Price Pi 0.01-0.05 Delivery incl."><textarea id="bdesc" placeholder="Description - Delivery costs included"></textarea><button class="btn" style="width:100%" onclick="registerBiz()">List Business</button><p id="reg_msg"></p></div></div>
+
+<div id="products" class="tabpage"><div class="clientBox"><h3>📦 Add Product - Delivery costs included</h3><input id="prodName" placeholder="Product Name"><select id="prodCategory"><option>Groceries</option><option>Electronics</option></select><input id="prodPricePi" type="number" step="0.01" placeholder="Price Pi - Delivery incl."><textarea id="prodDesc" placeholder="Description - Delivery costs included"></textarea><button class="btnGreen" style="width:100%" onclick="addProduct()">➕ ADD PRODUCT - Delivery incl.</button></div></div>
+
+<div id="clientinfo" class="tabpage">
+<div class="clientBox">
+<h3>👤 Client Information Page - Required for Delivery <span class="badge-incl">Delivery costs included</span></h3>
+<div style="text-align:center"><span class="badge3" style="background:#001a4d;color:#fff">✓ ISO 20022</span><span class="badge3" style="background:#ffcc00;color:#001a4d">✓ Open Standards</span><span class="badge3" style="background:#6a1b9a;color:#fff">π Pi Verified</span></div>
+<div class="emailBox">📧 gautengshoppinghub@gmail.com - Pi Only Delivery - Costs included</div>
+<input id="clientName" placeholder="Full Name *">
+<input id="clientPhone" placeholder="Phone / WhatsApp *">
+<input id="clientEmail" type="email" placeholder="Client Email Address * - e.g. client@gmail.com">
+<input id="deliveryAddress" type="text" placeholder="Delivery Address * - e.g. 123 Vilakazi St, Soweto - Delivery incl.">
+<input id="clientCity" placeholder="City * - e.g. Johannesburg">
+<input id="clientZip" placeholder="Zip Code / Postal Code">
+<textarea id="deliveryNote" placeholder="Delivery Note (Optional) - Delivery costs included"></textarea>
+<button class="btn" style="width:100%;margin-top:10px" onclick="saveClientInfo()">💾 Save Client Info - Delivery incl.</button>
+<p id="client_save_msg" style="text-align:center;background:#d4edda;padding:8px;border-radius:8px;display:none"></p>
+<button class="btn" style="width:100%;margin-top:8px;background:#111" onclick="showTab('testnet')">Go Shop → Delivery incl.</button>
+</div>
+</div>
+
+<div id="mall" class="tabpage"><div class="mallImage"><img src="https://raw.githubusercontent.com/Ndhlovu36/gauteng-shopping-hub/main/IMG-20260920-WA3111.jpg"></div><div style="text-align:center"><span class="badge3" style="background:#001a4d;color:#fff">✓ ISO 20022</span><span class="badge3" style="background:#ffcc00;color:#001a4d">✓ Open Standards</span><span class="badge3" style="background:#6a1b9a;color:#fff">π Pi Verified</span><span class="badge3" style="background:#00c853;color:#fff">Delivery costs included</span></div><div id="mall_dir"></div><div class="card"><button class="btnRed" onclick="clearPending()">🔴 Clear Pending Payment</button></div></div>
+
+<div id="orders" class="tabpage"><div class="card"><h3>📋 SAVED ORDERS - Delivery costs included - Soroban Ready</h3><div id="ordersList" style="max-height:600px;overflow-y:auto"><small>No orders yet - will save after Pi payment</small></div><button class="btn" style="width:100%;margin-top:8px" onclick="renderOrders()">🔄 Refresh Orders</button><button class="btnRed" style="background:#666" onclick="if(confirm('Clear local orders?')){localStorage.removeItem('gauteng_orders');renderOrders();}">🗑️ Clear Local</button></div></div>
+
+<script>
+const SUPABASE_URL="https://YOUR_PROJECT.supabase.co"; const SUPABASE_KEY="YOUR_ANON_KEY";
+let supabaseClient=null; try{supabaseClient=supabase.createClient(SUPABASE_URL,SUPABASE_KEY);}catch(e){}
+let SOROBAN_LIVE=false; function checkSoroban(){try{if(typeof Pi!=='undefined'&&Pi.Soroban){SOROBAN_LIVE=true;document.getElementById('sorobanBadge').innerHTML="⚡ SOROBAN LIVE - Escrow Active";return true;}}catch(e){}return false;}
+
+function showTab(id){document.querySelectorAll('.tabpage').forEach(p=>{p.style.display='none';p.classList.remove('active');});document.querySelectorAll('.t').forEach(t=>t.classList.remove('active'));document.getElementById(id).style.display='block';document.getElementById(id).classList.add('active');document.getElementById('tab-'+id).classList.add('active'); if(id=='orders') renderOrders();}
+function changeQty(d){var el=document.getElementById('truckQty');var v=parseInt(el.value)||1;v+=d;if(v<1) v=1;el.value=v;render();}
+var defaultBiz=[{cat:"Groceries",name:"Soweto Fresh Market",prod:"Family Grocery Pack",price:0.01,desc:"Pi only - Delivery costs included",wa:"082 123 4567",email:"soweto@business.co.za"},{cat:"Electronics",name:"Phone Masters",prod:"Samsung A15",price:0.02,desc:"Pi only - Delivery costs included",wa:"081 444 2222",email:"phonemasters@business.co.za"}];
+var customBiz=JSON.parse(localStorage.getItem('gauteng_hub_custom')||"[]");
+var customProducts=JSON.parse(localStorage.getItem('gauteng_products')||"[]");
+function allBiz(){return [].concat(defaultBiz).concat(customBiz).concat(customProducts)}
+
+function saveOrder(order){
+  let orders=JSON.parse(localStorage.getItem('gauteng_orders')||"[]");
+  orders.unshift(order);
+  localStorage.setItem('gauteng_orders',JSON.stringify(orders));
+  if(supabaseClient && !SUPABASE_URL.includes("YOUR_PROJECT")){supabaseClient.from('orders').insert(order);}
+  renderOrders();
+}
+function renderOrders(){
+  let list=document.getElementById('ordersList');
+  let orders=JSON.parse(localStorage.getItem('gauteng_orders')||"[]");
+  if(orders.length==0){list.innerHTML="<small>No orders yet - Delivery costs included</small>";return;}
+  list.innerHTML=orders.map(o=>`<div class="order-card"><b>${o.client_name}</b> - ${o.product} x${o.qty}<br>💰 Pi ${o.pi_amount} <span class='badge-incl'>Delivery costs included</span> ${o.contract_type?'<span class=badge-soroban>'+o.contract_type+'</span>':''}<br>📍 ${o.delivery_address}, ${o.city}<br>📧 ${o.client_email} | 📱 ${o.phone}<br>TXID: <small>${o.txid}</small><br><small>${new Date(o.created_at).toLocaleString()}</small></div>`).join("");
+}
+
+function render(){
+  var main="",test="",dir="",cats={};
+  allBiz().forEach(function(b){
+    var qty=parseInt(document.getElementById('truckQty').value)||1; var total=(b.price*qty).toFixed(4);
+    var card='<div class="card"><b>'+b.name+' <span class="badge">'+b.price+' Pi</span> <span class="badge-incl">Delivery costs included</span> <span class="badge-soroban">⚡ Soroban Ready</span></b><br><small>'+b.cat+' | '+b.email+'</small><p>'+b.prod+'<br><small>'+b.desc+'</small><br><small>WA: '+b.wa+' | Email: '+b.email+'</small></p><button class="btn" style="width:100%" onclick="pay('+b.price+',true,\''+b.prod.replace(/'/g,"")+'\')">Pay '+total+' Pi (Qty '+qty+') - Delivery incl.</button></div>';
+    main+=card; test+=card; if(!cats[b.cat]) cats[b.cat]=""; cats[b.cat]+=card;
+  });
+  document.getElementById('main_products').innerHTML=main;
+  document.getElementById('test_products').innerHTML=test;
+  var dhtml=""; for(var c in cats){ dhtml+='<div class="card"><b>'+c+' <span class=badge-incl>Delivery incl.</span></b></div>'+cats[c]; }
+  document.getElementById('mall_dir').innerHTML=dhtml;
+}
+render();
+function saveClientInfo(){
+  var name=document.getElementById('clientName').value;
+  var phone=document.getElementById('clientPhone').value;
+  var email=document.getElementById('clientEmail').value;
+  var addr=document.getElementById('deliveryAddress').value;
+  var city=document.getElementById('clientCity').value;
+  if(!name||!phone||!email||!addr){ alert('Please fill: Full Name, Phone, Client Email, Delivery Address'); return; }
+  var info={name:name,phone:phone,email:email,address:addr,city:city,zip:document.getElementById('clientZip').value,note:document.getElementById('deliveryNote').value};
+  localStorage.setItem('gauteng_client_info', JSON.stringify(info));
+  var msg=document.getElementById('client_save_msg');
+  msg.style.display='block';
+  msg.innerText="✅ Saved! Email: "+email+" | Delivery: "+addr+" - Delivery costs included - Ready to Pay, no expiry - Soroban Ready";
+  setTimeout(function(){ showTab('testnet'); }, 1000);
+}
+(function(){ var saved=JSON.parse(localStorage.getItem('gauteng_client_info')||"null"); if(saved){ document.getElementById('clientName').value=saved.name||""; document.getElementById('clientPhone').value=saved.phone||""; document.getElementById('clientEmail').value=saved.email||""; document.getElementById('deliveryAddress').value=saved.address||""; document.getElementById('clientCity').value=saved.city||""; document.getElementById('clientZip').value=saved.zip||""; document.getElementById('deliveryNote').value=saved.note||""; }})();
+
+async function pay(amount,isMainnet,memo){
+  var clientInfo=JSON.parse(localStorage.getItem('gauteng_client_info')||"null");
+  if(!clientInfo ||!clientInfo.email ||!clientInfo.address){
+    alert('⚠️ Please fill Client Email & Delivery Address first! Go to Client Info tab.');
+    showTab('clientinfo');
+    return;
+  }
+  var qty=parseInt(document.getElementById('truckQty').value)||1;
+  var total=parseFloat((amount*qty).toFixed(4));
+  var status=isMainnet?document.getElementById('main_status'):document.getElementById('test_status');
+  if(status) status.innerText="Paying "+total+" Pi to "+clientInfo.address+" - Delivery costs included...";
+  if(!window.Pi){ alert('Open in Pi Browser to Pay'); return; }
+  checkSoroban();
+  let orderBase={created_at:new Date().toISOString(),client_name:clientInfo.name,client_email:clientInfo.email,phone:clientInfo.phone,delivery_address:clientInfo.address,city:clientInfo.city,product:memo,qty:qty,pi_amount:total,delivery_included:true,contract_type:SOROBAN_LIVE?"SOROBAN_ESCROW":"STANDARD_PI"};
+
+  try{
+    if(SOROBAN_LIVE){
+      try{
+        if(status) status.innerText="⚡ Creating Escrow "+total+" Pi - Delivery incl...";
+        let contract=await Pi.Soroban.createContract({type:"escrow",amount:total,memo:(memo+" Delivery incl").substring(0,28),metadata:orderBase,conditions:{delivery_required:true,auto_release_after_days:7}});
+        orderBase.txid=contract.txid||contract.hash;
+        saveOrder(orderBase);
+        if(status) status.innerText="✅ ESCROW LOCKED Pi "+total+" | Delivery: "+clientInfo.address+" | TX: "+orderBase.txid;
+        return;
+      }catch(e){console.log("Escrow fallback",e);}
+    }
+
+    Pi.init({version:"2.0", sandbox:!isMainnet});
+    await Pi.authenticate(['username','payments'], function onIncompletePaymentFound(payment){
+      return fetch('/api/complete',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({paymentId:payment.identifier,txid:payment.transaction?payment.transaction.txid:payment.txid})});
+    });
+    await Pi.createPayment({
+      amount: total,
+      memo: (memo+" Delivery incl").substring(0,28),
+      metadata: { product: memo, qty: qty, client_email: clientInfo.email, delivery_address: clientInfo.address, city: clientInfo.city, phone: clientInfo.phone, hub: "Gauteng Shopping Hub", delivery_included:true, contract_type:orderBase.contract_type }
+    }, {
+      onReadyForServerApproval: async function(paymentId){
+        if(status) status.innerText="Approving "+paymentId+"... Delivery costs included - No expiry";
+        try{ await fetch('/api/approve',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({paymentId:paymentId})}); }catch(e){}
+      },
+      onReadyForServerCompletion: async function(paymentId,txid){
+        orderBase.txid=txid; orderBase.payment_id=paymentId;
+        saveOrder(orderBase);
+        if(status) status.innerText="✅ SUCCESS Pi "+total+" | Delivery costs included | Delivery: "+clientInfo.address+" | Email: "+clientInfo.email+" | TxID: "+txid;
+        try{ await fetch('/api/complete',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({paymentId:paymentId,txid:txid,order:orderBase})}); }catch(e){}
+        alert("✅ PAID "+total+" Pi - Delivery costs included\nDelivery: "+clientInfo.address+"\nEmail: "+clientInfo.email+"\nTxID: "+txid+"\nOrder saved!");
+        showTab('orders');
+      },
+      onCancel:function(id){ if(status) status.innerText="❌ Cancelled - Click Clear Pending to retry - Delivery incl."; },
+      onError:function(err){ if(status) status.innerText="❌ "+err.message+" - Click Clear Pending - Delivery incl."; }
+    });
+  }catch(e){
+    if(status) status.innerText="Error: "+(e.message||e);
+    alert("Payment Error: "+(e.message||e)+"\nClick 🔴 Clear Pending then retry");
+  }
+}
+async function login(){ if(!window.Pi){ alert('Open in Pi Browser'); return; } Pi.init({version:"2.0"}); var auth=await Pi.authenticate(['username','payments'], function(payment){ return fetch('/api/complete',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({paymentId:payment.identifier,txid:payment.transaction?payment.transaction.txid:''})}); }); document.getElementById('user').innerText="Hi, "+auth.user.username; document.getElementById('piStatus').innerText="✅ "+auth.user.username+(SOROBAN_LIVE?" ⚡ SOROBAN LIVE":" - Soroban Ready"); checkSoroban(); }
+function clearPending(){ if(window.Pi){ Pi.init({version:"2.0"}); Pi.authenticate(['username','payments'], function(p){ console.log("Clearing",p); }).catch(function(){}); } document.getElementById('main_status').innerText="✅ Cleared! Ready to Pay - Delivery costs included - No expiry - Soroban Ready"; document.getElementById('test_status').innerText="✅ Cleared! Ready to Pay - Delivery costs included - No expiry - Soroban Ready"; alert("✅ Pending cleared! Try Pay again - Delivery incl."); }
+function addProduct(){ var name=document.getElementById('prodName').value; var cat=document.getElementById('prodCategory').value; var price=parseFloat(document.getElementById('prodPricePi').value); if(!name||!price) return; customProducts.push({cat:cat,name:"My Biz",prod:name,price:price,desc:"Pi only - Delivery costs included",wa:"082",email:"gautengshoppinghub@gmail.com"}); localStorage.setItem('gauteng_products', JSON.stringify(customProducts)); render(); }
+function registerBiz(){ var bname=document.getElementById('bname').value; var bcat=document.getElementById('bcat').value; var bwa=document.getElementById('bwa').value; var bemail=document.getElementById('bemail').value; var bprod=document.getElementById('bprod').value; var bprice=parseFloat(document.getElementById('bprice').value); var bdesc=document.getElementById('bdesc').value; if(!bname||!bprice||!bemail){ alert('Enter Business Name, Email & Price'); return; } customBiz.push({cat:bcat,name:bname,prod:bprod,price:bprice,desc:bdesc+" Delivery costs included",wa:bwa,email:bemail}); localStorage.setItem('gauteng_hub_custom', JSON.stringify(customBiz)); document.getElementById('reg_msg').innerText="✅ LIVE - "+bname+" - "+bemail+" - Delivery costs included - Soroban Ready"; render(); }
+checkSoroban(); renderOrders();
+</script></body></html>
